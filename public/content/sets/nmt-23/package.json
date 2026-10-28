@@ -4,7 +4,7 @@
     "id": "nmt-23",
     "title": "Симуляція НМТ №23",
     "subject": "Математика",
-    "version": "2.1.0",
+    "version": "2.2.0",
     "durationSeconds": 5400,
     "orderedQuestionIds": [
       "nmt23-q01",
@@ -773,9 +773,22 @@
     {
       "id": "nmt-reference",
       "title": "Довідкові матеріали",
-      "kind": "pdf",
-      "src": "reference/dovidkovi-materialy.pdf",
-      "downloadable": true
+      "kind": "images",
+      "pages": [
+        {
+          "src": "reference/page-1.png",
+          "alt": "Довідкові матеріали, сторінка 1: таблиця квадратів, алгебра і початки аналізу"
+        },
+        {
+          "src": "reference/page-2.png",
+          "alt": "Довідкові матеріали, сторінка 2: похідна, первісна, тригонометрія"
+        },
+        {
+          "src": "reference/page-3.png",
+          "alt": "Довідкові матеріали, сторінка 3: геометрія, координати та вектори"
+        }
+      ],
+      "downloadSrc": "reference/dovidkovi-materialy.pdf"
     }
   ],
   "conversionTables": [

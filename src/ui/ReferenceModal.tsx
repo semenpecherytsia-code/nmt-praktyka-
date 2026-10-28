@@ -37,7 +37,7 @@ export function ReferenceModal({ open, onClose, material, baseDir }: Props) {
         <button type="button" className="btn btn--ghost btn--icon" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1} aria-label="Попередня сторінка">
           <ChevronLeft size={20} aria-hidden />
         </button>
-        <span className="ref-toolbar__page" aria-live="polite">Сторінка {page}{total ? ` з ${total}` : ''}</span>
+        <span className="ref-toolbar__page" aria-live="polite"><span className="hide-xs">Сторінка </span>{page}{total ? ` з ${total}` : ''}</span>
         <button type="button" className="btn btn--ghost btn--icon" onClick={() => setPage((p) => (total ? Math.min(total, p + 1) : p))} disabled={!total || page >= total} aria-label="Наступна сторінка">
           <ChevronRight size={20} aria-hidden />
         </button>
@@ -51,7 +51,7 @@ export function ReferenceModal({ open, onClose, material, baseDir }: Props) {
           <Plus size={18} aria-hidden />
         </button>
         {download && (
-          <a className="btn btn--ghost btn--sm" href={download} download target="_blank" rel="noopener">
+          <a className="btn btn--ghost btn--sm" href={download} download target="_blank" rel="noopener" aria-label="Завантажити PDF" title="Завантажити PDF">
             <Download size={18} aria-hidden /> <span className="hide-xs">Завантажити PDF</span><span className="show-xs">PDF</span>
           </a>
         )}

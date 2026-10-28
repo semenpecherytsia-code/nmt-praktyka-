@@ -70,7 +70,7 @@ Q=[
  nm(22,"У коробці 3 червоні та 5 синіх кульок. Навмання беруть одну кульку. Знайдіть імовірність того, що вона червона. Відповідь можна записати звичайним дробом через «/» (наприклад, 1/4) або десятковим дробом.","3/8",{"mode":"exact","allowFractions":True},
     "Усього кульок $3+5=8$, червоних — 3.\n\n$P=\\dfrac{3}{8}=0{,}375$."),
 ]
-sim={"id":"nmt-23","title":"Симуляція НМТ №23","subject":"Математика","version":"2.1.0",
+sim={"id":"nmt-23","title":"Симуляція НМТ №23","subject":"Математика","version":"2.2.0",
  "durationSeconds":5400,"orderedQuestionIds":[q["id"] for q in Q],"referenceMaterialId":"nmt-reference",
  "scoringProfileId":"nmt-math-22","conversionTableId":"nmt-math-2025","readiness":"complete","isDemo":False,
  "source":{"kind":"demo","note":"Задачі-приклади, складені для перевірки сайту (не офіційні завдання симуляції №23). Назву встановлено на прохання власника сайту."}}
@@ -79,7 +79,7 @@ pkg={"schemaVersion":1,"simulation":sim,"questions":Q,
    {"from":1,"to":15,"type":"single_choice","maxPoints":1,"optionCount":5},
    {"from":16,"to":18,"type":"matching","maxPoints":3,"rowCount":3,"optionCount":5},
    {"from":19,"to":22,"type":"numeric","maxPoints":2}]}],
- "referenceMaterials":[{"id":"nmt-reference","title":"Довідкові матеріали","kind":"pdf","src":"reference/dovidkovi-materialy.pdf","downloadable":True}],
+ "referenceMaterials":[{"id":"nmt-reference","title":"Довідкові матеріали","kind":"images","pages":[{"src":"reference/page-1.png","alt":"Довідкові матеріали, сторінка 1: таблиця квадратів, алгебра і початки аналізу"},{"src":"reference/page-2.png","alt":"Довідкові матеріали, сторінка 2: похідна, первісна, тригонометрія"},{"src":"reference/page-3.png","alt":"Довідкові матеріали, сторінка 3: геометрія, координати та вектори"}],"downloadSrc":"reference/dovidkovi-materialy.pdf"}],
  "conversionTables":[{"id":"nmt-math-2025","year":2025,"source":"Таблиця переведення тестових балів НМТ з математики у шкалу 100–200, вступ 2025 (додаток до Порядку прийому). Поріг «склав / не склав» — 5 тестових балів.","maxPrimary":32,"map":{"0": None, "1": None, "2": None, "3": None, "4": None, "5": 100, "6": 108, "7": 115, "8": 123, "9": 131, "10": 134, "11": 137, "12": 140, "13": 143, "14": 145, "15": 147, "16": 148, "17": 149, "18": 150, "19": 151, "20": 152, "21": 155, "22": 159, "23": 163, "24": 167, "25": 170, "26": 173, "27": 176, "28": 180, "29": 184, "30": 189, "31": 194, "32": 200}}]}
 out="public/content/sets/nmt-23/"
 json.dump(pkg,open(out+"package.json","w"),ensure_ascii=False,indent=2)
