@@ -145,7 +145,10 @@ img { max-width: 100%; height: auto; }
 .question__type { margin-top: 4px; color: var(--text-2); font-size: 14px; }
 .question__statement { font-size: 19px; line-height: 1.6; }
 .rich p + p { margin-top: 0.75em; }
-.math-block { display: block; overflow-x: auto; overflow-y: hidden; padding: 4px 2px 8px; margin: 4px 0; max-width: 100%; }
+.math-block { display: block; overflow-x: auto; overflow-y: hidden; padding: 4px 3px 8px; margin: 4px 0; max-width: 100%; scrollbar-width: none; }
+/* Формули прокручуються пальцем/трекпадом, але без видимої смуги прокрутки. */
+.math-block::-webkit-scrollbar, .choice__content::-webkit-scrollbar, .matching__col li > .rich::-webkit-scrollbar,
+.dnd__item > .rich::-webkit-scrollbar, .mchip__text::-webkit-scrollbar { display: none; }
 .math-block .katex-display { margin: 0.4em 0; }
 .math-inline .katex { white-space: nowrap; }
 .katex { font-size: 1.12em; }
@@ -165,7 +168,7 @@ img { max-width: 100%; height: auto; }
 .choice:hover { border-color: #B9C3D3; }
 .choice input { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
 .choice__letter { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--control-border); font-weight: 700; font-size: 16px; flex: none; transition: all var(--dur); }
-.choice__content { min-width: 0; overflow-x: auto; overflow-y: hidden; padding-block: 4px; scrollbar-width: thin; }
+.choice__content { min-width: 0; overflow-x: auto; overflow-y: hidden; padding: 4px 3px; scrollbar-width: none; }
 .choice.is-selected { border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 0 0 1px var(--accent) inset; }
 .choice.is-selected .choice__letter { background: var(--accent); border-color: var(--accent); color: #fff; }
 .choice:has(input:focus-visible) { outline: 3px solid var(--accent); outline-offset: 2px; }
@@ -185,7 +188,7 @@ img { max-width: 100%; height: auto; }
 .matching__lists { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .matching__col { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; align-content: start; }
 .matching__col li { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border-radius: 14px; background: var(--bg); font-size: 18px; line-height: 1.5; min-width: 0; }
-.matching__col li > div, .matching__col li > .rich { min-width: 0; overflow-x: auto; overflow-y: hidden; padding-block: 2px; scrollbar-width: thin; }
+.matching__col li > div, .matching__col li > .rich { min-width: 0; overflow-x: auto; overflow-y: hidden; padding: 2px 3px; scrollbar-width: none; }
 .tag { display: inline-flex; align-items: center; justify-content: center; min-width: 28px; height: 28px; padding: 0 6px; border-radius: 8px; background: var(--surface); border: 1px solid var(--border); font-weight: 700; font-size: 15px; flex: none; }
 .tag--num { background: var(--text); color: #fff; border-color: var(--text); }
 .matching__grid { border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin: 0; display: grid; gap: 12px; min-width: 0; }
@@ -214,7 +217,7 @@ img { max-width: 100%; height: auto; }
 .dnd__rows { display: grid; gap: 10px; min-width: 0; }
 .dnd__row { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 10px; align-items: center; }
 .dnd__item { display: flex; align-items: center; gap: 10px; min-height: 60px; padding: 10px 14px; border-radius: 14px; background: var(--accent-soft); border: 1.5px solid #C9C2FB; font-size: 18px; min-width: 0; }
-.dnd__item > .rich, .mchip__text { min-width: 0; overflow-x: auto; overflow-y: hidden; padding-block: 2px; scrollbar-width: thin; }
+.dnd__item > .rich, .mchip__text { min-width: 0; overflow-x: auto; overflow-y: hidden; padding: 2px 3px; scrollbar-width: none; }
 .dnd__num { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 8px; background: var(--accent); color: #fff; font-weight: 700; flex: none; }
 .dnd__arrow { color: var(--text-2); flex: none; }
 .dnd__slot { min-height: 60px; border-radius: 14px; border: 2px dashed var(--control-border); display: flex; align-items: stretch; transition: border-color var(--dur), background var(--dur); min-width: 0; }
@@ -438,8 +441,9 @@ a.brand:hover span { color: var(--accent-text); }
 
 @media (max-width: 640px) {
   .dnd { grid-template-columns: 1fr; gap: 12px; }
-  .dnd__rows { gap: 8px; }
-  .dnd__row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
+  .dnd__rows { gap: 14px; }
+  .dnd__row { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .dnd__slot { margin-left: 24px; }
   .dnd__arrow { display: none; }
   .dnd__item { min-height: 52px; padding: 8px 10px; gap: 8px; font-size: 16px; }
   .dnd__num { width: 26px; height: 26px; }
@@ -447,7 +451,8 @@ a.brand:hover span { color: var(--accent-text); }
   .dnd__drop { min-height: 48px; }
   .dnd__bank { padding: 10px; }
   .dnd__options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .mchip { min-height: 48px; padding: 6px 8px; gap: 8px; font-size: 16px; }
+  .mchip { min-height: 48px; padding: 6px 6px; gap: 6px; font-size: 16px; }
+  .mchip .katex, .dnd__item .katex { font-size: 1.1em; }
   .mchip--placed { min-height: 48px; }
   .mchip__letter { width: 26px; height: 26px; font-size: 14px; }
   .mchip__remove { width: 44px; height: 44px; margin-right: -4px; }
