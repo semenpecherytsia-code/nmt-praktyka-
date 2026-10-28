@@ -215,7 +215,7 @@ img { max-width: 100%; height: auto; }
 /* відповідності: перетягування */
 .dnd { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 16px 20px; align-items: start; }
 .dnd__rows { display: grid; gap: 10px; min-width: 0; }
-.dnd__row { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 10px; align-items: center; }
+.dnd__row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; align-items: center; }
 .dnd__item { display: flex; align-items: center; gap: 10px; min-height: 60px; padding: 10px 14px; border-radius: 14px; background: var(--accent-soft); border: 1.5px solid #C9C2FB; font-size: 18px; min-width: 0; }
 .dnd__item > .rich, .mchip__text { min-width: 0; overflow-x: auto; overflow-y: hidden; padding: 2px 3px; scrollbar-width: none; }
 .dnd__num { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 8px; background: var(--accent); color: #fff; font-weight: 700; flex: none; }
@@ -223,18 +223,17 @@ img { max-width: 100%; height: auto; }
 .dnd__slot { min-height: 60px; border-radius: 14px; border: 2px dashed var(--control-border); display: flex; align-items: stretch; transition: border-color var(--dur), background var(--dur); min-width: 0; }
 .dnd__slot.is-filled { border-style: solid; border-color: transparent; }
 .dnd__slot.is-over { border-color: var(--ok); background: var(--ok-bg); }
-.dnd__drop { flex: 1; border: 0; background: transparent; border-radius: 12px; cursor: pointer; color: var(--ok); font-weight: 600; min-height: 56px; }
-.dnd__drop:disabled { cursor: default; }
+.dnd__drop { flex: 1; min-height: 56px; }
 .dnd__bank { border: 1px solid var(--border); border-radius: 16px; padding: 12px; display: grid; gap: 10px; min-width: 0; background: var(--bg); }
 .dnd__bank-title { font-weight: 700; font-size: 15px; color: var(--text-2); }
 .dnd__options { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .dnd__status { grid-column: 1 / -1; font-size: 14px; color: var(--text-2); }
 .mchip { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 52px; padding: 8px 12px; border-radius: 12px; border: 1.5px solid var(--ok-border); background: var(--ok-bg);
   color: var(--text); font-size: 17px; text-align: left; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; transition: box-shadow var(--dur), border-color var(--dur), opacity var(--dur); }
-.mchip:hover:not(:disabled) { border-color: var(--ok); }
-.mchip.is-picked { border-color: var(--ok); box-shadow: 0 0 0 3px rgba(21, 128, 61, 0.25); }
+.mchip:hover:not(.is-disabled) { border-color: var(--ok); }
 .mchip.is-dragging { opacity: 0.4; }
-.mchip:disabled { cursor: default; }
+.mchip.is-disabled { cursor: default; }
+.mchip--placed:not(.is-disabled) { cursor: grab; }
 .mchip__letter { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 8px; background: var(--ok); color: #fff; font-weight: 700; font-size: 15px; flex: none; }
 .mchip--placed { cursor: default; flex: 1; min-height: 56px; }
 .mchip__remove { margin-left: auto; flex: none; display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 8px; border: 1px solid var(--ok-border); background: var(--surface); color: var(--ok); cursor: pointer; }
@@ -377,13 +376,13 @@ a.brand:hover span { color: var(--accent-text); }
 .status--skipped { color: var(--skip); background: var(--skip-bg); border-color: #CBD5E1; border-style: dashed; }
 .answer-line { display: flex; align-items: center; gap: 8px; font-weight: 600; margin-bottom: 10px; }
 .answer-line--none { color: var(--skip); }
-.mtable { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 16px; }
-.mtable th, .mtable td { text-align: left; padding: 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
-.mtable thead th { font-size: 13px; color: var(--text-2); font-weight: 600; }
-.mtable tbody th { font-weight: 500; }
-.mtable tr.ok td:first-of-type, .mtable tr.ok td { background: var(--ok-bg); }
-.mtable tr.bad td { background: var(--bad-bg); }
-.mtable__res { white-space: nowrap; }
+.match-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 16px; }
+.match-table th, .match-table td { text-align: left; padding: 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.match-table thead th { font-size: 13px; color: var(--text-2); font-weight: 600; }
+.match-table tbody th { font-weight: 500; }
+.match-table tr.ok td:first-of-type, .match-table tr.ok td { background: var(--ok-bg); }
+.match-table tr.bad td { background: var(--bad-bg); }
+.match-table__res { white-space: nowrap; }
 .numeric-review { margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .numeric-review > div { border-radius: 14px; padding: 14px 16px; border: 1.5px solid var(--border); }
 .numeric-review dt { font-size: 13px; color: var(--text-2); }
@@ -440,17 +439,15 @@ a.brand:hover span { color: var(--accent-text); }
 }
 
 @media (max-width: 640px) {
-  .dnd { grid-template-columns: 1fr; gap: 12px; }
-  .dnd__rows { gap: 14px; }
-  .dnd__row { grid-template-columns: minmax(0, 1fr); gap: 6px; }
-  .dnd__slot { margin-left: 24px; }
-  .dnd__arrow { display: none; }
+  .dnd { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 12px 8px; }
+  .dnd__rows { gap: 12px; }
+  .dnd__row { grid-template-columns: minmax(0, 1fr); gap: 4px; }
   .dnd__item { min-height: 52px; padding: 8px 10px; gap: 8px; font-size: 16px; }
   .dnd__num { width: 26px; height: 26px; }
   .dnd__slot { min-height: 52px; }
   .dnd__drop { min-height: 48px; }
   .dnd__bank { padding: 10px; }
-  .dnd__options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dnd__bank { padding: 8px; gap: 8px; }
   .mchip { min-height: 48px; padding: 6px 6px; gap: 6px; font-size: 16px; }
   .mchip .katex, .dnd__item .katex { font-size: 1.1em; }
   .mchip--placed { min-height: 48px; }
@@ -502,13 +499,13 @@ a.brand:hover span { color: var(--accent-text); }
   .result__counts { grid-template-columns: 1fr 1fr; }
   .numeric-review { grid-template-columns: 1fr; }
   .solution { padding: 16px; font-size: 16.5px; }
-  .mtable thead { display: none; }
-  .mtable, .mtable tbody, .mtable tr, .mtable th, .mtable td { display: block; width: 100%; }
-  .mtable tr { border: 1px solid var(--border); border-radius: 12px; margin-bottom: 8px; overflow: hidden; }
-  .mtable td::before { display: block; font-size: 12px; color: var(--text-2); }
-  .mtable td:nth-of-type(1)::before { content: 'Ваша відповідь'; }
-  .mtable td:nth-of-type(2)::before { content: 'Правильна'; }
-  .mtable td:nth-of-type(3)::before { content: 'Результат'; }
+  .match-table thead { display: none; }
+  .match-table, .match-table tbody, .match-table tr, .match-table th, .match-table td { display: block; width: 100%; }
+  .match-table tr { border: 1px solid var(--border); border-radius: 12px; margin-bottom: 8px; overflow: hidden; }
+  .match-table td::before { display: block; font-size: 12px; color: var(--text-2); }
+  .match-table td:nth-of-type(1)::before { content: 'Ваша відповідь'; }
+  .match-table td:nth-of-type(2)::before { content: 'Правильна'; }
+  .match-table td:nth-of-type(3)::before { content: 'Результат'; }
   .dialog { max-width: 100vw; max-height: 100dvh; }
   .dialog__inner { max-height: calc(100dvh - 16px); }
   .dialog--reference, .dialog--lg { width: 100vw; margin: 8px auto 0; }
@@ -528,4 +525,27 @@ a.brand:hover span { color: var(--accent-text); }
   .matching__grid { padding: 12px 8px; }
   .mgrid__line { grid-template-columns: 24px repeat(var(--cols), minmax(44px, 1fr)); gap: 6px; }
   .mgrid__clear { display: none; }
+}
+
+/* Перетягування пальцем: внутрішні елементи варіанта (формули) не повинні перехоплювати жест як прокрутку. */
+.mchip, .mchip * { touch-action: none; }
+.mchip .mchip__text { overflow: hidden; }
+.dnd__options { grid-template-columns: minmax(0, 1fr); }
+.dnd__options li { min-width: 0; }
+@media (max-width: 640px) {
+  .dnd { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); }
+  .dnd__item { font-size: 15px; }
+  .dnd__item > .rich { hyphens: auto; -webkit-hyphens: auto; overflow-wrap: anywhere; }
+}
+@media (max-width: 640px) {
+  .dnd { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); }
+  .dnd__bank .mchip { padding: 6px 4px; gap: 4px; }
+  .dnd__bank .mchip .katex { font-size: 1em; }
+  .dnd__bank .mchip__letter { width: 24px; height: 24px; }
+}
+@media (max-width: 640px) {
+  .mchip--placed { padding: 4px 2px 4px 6px; gap: 4px; }
+  .mchip--placed .katex { font-size: 0.98em; }
+  .mchip--placed .mchip__letter { width: 24px; height: 24px; }
+  .mchip--placed .mchip__remove { width: 40px; height: 44px; margin-right: 0; }
 }

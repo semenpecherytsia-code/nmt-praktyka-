@@ -263,7 +263,7 @@ function MatchingReview({ q, r }: { q: Extract<Question, { type: 'matching' }>; 
   return (
     <>
       {r.status === 'skipped' && <p className="answer-line answer-line--none"><CircleSlash size={16} aria-hidden /> Відповідь не надано</p>}
-      <table className="mtable">
+      <table className="match-table">
         <caption className="visually-hidden">Перевірка кожної відповідності</caption>
         <thead><tr><th scope="col">Пункт</th><th scope="col">Ваша відповідь</th><th scope="col">Правильна</th><th scope="col"><span className="visually-hidden">Результат</span></th></tr></thead>
         <tbody>
@@ -275,7 +275,7 @@ function MatchingReview({ q, r }: { q: Extract<Question, { type: 'matching' }>; 
                 <th scope="row"><span className="tag tag--num">{i + 1}</span> <RichText text={row.content} inline /></th>
                 <td>{given ? <><strong>{letter(given)}</strong> <RichText text={content(given)} inline /></> : <span className="muted">не обрано</span>}</td>
                 <td><strong>{letter(rc?.correct ?? q.answerKey.pairs[row.id])}</strong> <RichText text={content(q.answerKey.pairs[row.id])} inline /></td>
-                <td className="mtable__res">
+                <td className="match-table__res">
                   {rc?.ok ? <span className="tagline tagline--ok"><Check size={14} aria-hidden /> +1</span>
                     : given ? <span className="tagline tagline--bad"><X size={14} aria-hidden /> 0</span>
                     : <span className="tagline"><CircleSlash size={14} aria-hidden /> 0</span>}

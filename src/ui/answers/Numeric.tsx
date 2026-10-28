@@ -28,14 +28,11 @@ export function Numeric({ q, value, onChange, onSubmit, disabled }: Props) {
         aria-readonly={disabled || undefined}
         maxLength={40}
         aria-invalid={!!error}
-        aria-describedby={`${inputId}-hint${error ? ` ${inputId}-err` : ''}`}
+        aria-describedby={error ? `${inputId}-err` : undefined}
         onChange={(e) => onChange({ type: 'numeric', raw: e.target.value })}
         onBlur={() => setTouched(true)}
         onKeyDown={(e) => { if (e.key === 'Enter' && !disabled) { setTouched(true); onSubmit(); } }}
       />
-      <p id={`${inputId}-hint`} className="hint">
-        Ціле або десяткове число; кома або крапка, мінус дозволено{q.numericRule.allowFractions ? '; у цьому завданні також дріб через «/»' : ''}.
-      </p>
       <p id={`${inputId}-err`} className="field-error" aria-live="polite">{error}</p>
     </div>
   );

@@ -120,9 +120,23 @@ await step('збереження: перехід на наступне, відп
   await page.waitForURL(/q\/3$/);
 });
 
+async function touchDrag(p, from, to) {
+  const cdp = await p.context().newCDPSession(p);
+  await from.evaluate((e) => e.scrollIntoView({ block: 'center' }));
+  const a = await from.boundingBox(); const b = await to.boundingBox();
+  const pt = (x, y) => [{ x, y, id: 1 }];
+  const ax = a.x + a.width / 2, ay = a.y + a.height / 2, bx = b.x + b.width / 2, by = b.y + b.height / 2;
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: pt(ax, ay) });
+  for (let i = 1; i <= 10; i++) await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: pt(ax + (bx - ax) * i / 10, ay + (by - ay) * i / 10) });
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  await cdp.detach();
+  await p.waitForTimeout(400);
+}
+
 async function dragChip(letter, row) {
   const chip = page.getByRole('button', { name: `Варіант ${letter}`, exact: true });
   const slot = page.locator('.dnd__slot').nth(row - 1);
+  await page.locator('.dnd').evaluate((e) => e.scrollIntoView({ block: 'center' }));
   const a = await chip.boundingBox(); const b = await slot.boundingBox();
   await page.mouse.move(a.x + a.width / 2, a.y + a.height / 2);
   await page.mouse.down();
@@ -131,15 +145,16 @@ async function dragChip(letter, row) {
   await page.mouse.up();
 }
 
-await step('відповідності перетягуванням (16) і натисканням (17)', async () => {
+await step('відповідності перетягуванням (16, 17)', async () => {
   await page.locator('.exam-side .qcell').nth(15).click();
   await page.waitForURL(/q\/16$/);
   await dragChip('В', 1);
   await page.getByRole('button', { name: 'Пункт 1: прибрати варіант В' }).waitFor();
   assert(!(await page.getByRole('button', { name: 'Варіант В', exact: true }).count()), 'використаний варіант лишився в списку');
   await dragChip('Г', 2);
-  await page.getByRole('button', { name: 'Варіант Б', exact: true }).click();
-  await page.getByRole('button', { name: 'Пункт 3: поставити варіант Б' }).click();
+  await page.getByRole('button', { name: 'Варіант Б', exact: true }).click(); // натискання нічого не ставить
+  await page.locator('.dnd__status', { hasText: 'Заповнено 2 з 3' }).waitFor();
+  await dragChip('Б', 3);
   await page.locator('.dnd__status', { hasText: 'Заповнено 3 з 3' }).waitFor();
   await page.screenshot({ path: 'e2e-shots/05-exam-matching-1280.png', fullPage: true });
   // прибрати й повернути
@@ -148,19 +163,27 @@ await step('відповідності перетягуванням (16) і на
   await dragChip('Б', 3);
   await page.getByRole('button', { name: 'Зберегти відповідь' }).click();
   await page.waitForURL(/q\/17$/);
-  await page.getByRole('button', { name: 'Варіант В', exact: true }).click();
-  await page.getByRole('button', { name: 'Пункт 1: поставити варіант В' }).click();
+  await dragChip('В', 1);
   await page.locator('.dnd__status', { hasText: 'Заповнено 1 з 3' }).waitFor();
   await page.getByRole('button', { name: 'Зберегти відповідь' }).click();
   await page.waitForURL(/q\/18$/);
 });
 
-await step('відповідності клавіатурою (18), варіант не повторюється, 16 заблоковано', async () => {
-  await page.getByRole('button', { name: 'Варіант Б', exact: true }).focus();
-  await page.keyboard.press('Enter');
-  await page.getByRole('button', { name: 'Пункт 1: поставити варіант Б' }).focus();
-  await page.keyboard.press('Enter');
+await step('відповідності (18): обмін місцями, варіант не повторюється, 16 заблоковано', async () => {
+  await dragChip('В', 1);
+  await dragChip('Б', 2);
+  // перетягнути поставлений варіант з клітинки 1 у клітинку 2 — вони міняються місцями
+  {
+    await page.locator('.dnd').evaluate((e) => e.scrollIntoView({ block: 'center' }));
+    const a = await page.locator('.dnd__slot').nth(0).locator('.mchip').boundingBox();
+    const b = await page.locator('.dnd__slot').nth(1).boundingBox();
+    await page.mouse.move(a.x + 20, a.y + a.height / 2); await page.mouse.down();
+    await page.mouse.move(a.x + 40, a.y + a.height / 2, { steps: 3 });
+    await page.mouse.move(b.x + 20, b.y + b.height / 2, { steps: 8 }); await page.mouse.up();
+  }
   await page.getByRole('button', { name: 'Пункт 1: прибрати варіант Б' }).waitFor();
+  await page.getByRole('button', { name: 'Пункт 2: прибрати варіант В' }).waitFor();
+  await page.getByRole('button', { name: 'Пункт 2: прибрати варіант В' }).click();
   await dragChip('В', 2);
   assert(!(await page.getByRole('button', { name: 'Варіант В', exact: true }).count()), 'варіант можна використати двічі');
   await dragChip('А', 3);
@@ -398,10 +421,10 @@ for (const w of [360, 390]) {
     await p.getByRole('button', { name: /1 \/ 22/ }).tap();
     await p.locator('dialog[open] .qcell').nth(15).tap();
     await p.waitForURL(/q\/16$/);
-    await p.getByRole('button', { name: 'Варіант Г', exact: true }).tap();
-    await p.getByRole('button', { name: 'Пункт 1: поставити варіант Г' }).tap();
-    await p.getByRole('button', { name: 'Варіант Б', exact: true }).tap();
-    await p.getByRole('button', { name: 'Пункт 2: поставити варіант Б' }).tap();
+    await touchDrag(p, p.getByRole('button', { name: 'Варіант Г', exact: true }), p.locator('.dnd__slot').nth(0));
+    await touchDrag(p, p.getByRole('button', { name: 'Варіант Б', exact: true }), p.locator('.dnd__slot').nth(1));
+    const cols = await p.evaluate(() => { const a = document.querySelector('.dnd__rows').getBoundingClientRect(), b = document.querySelector('.dnd__bank').getBoundingClientRect(); return b.left > a.right - 1; });
+    assert(cols, 'на телефоні варіанти не праворуч від пунктів');
     await p.locator('.dnd__status', { hasText: 'Заповнено 2 з 3' }).waitFor();
     await noHScroll(p);
     await p.screenshot({ path: `e2e-shots/21-mobile-${w}-matching.png`, fullPage: true });
