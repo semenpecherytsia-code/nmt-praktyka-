@@ -4,3 +4,4 @@ media/*
 !media/README.md
 e2e-shots
 *.log
+*.tsbuildinfo
