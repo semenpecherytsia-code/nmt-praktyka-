@@ -549,3 +549,5 @@ a.brand:hover span { color: var(--accent-text); }
   .mchip--placed .mchip__letter { width: 24px; height: 24px; }
   .mchip--placed .mchip__remove { width: 40px; height: 44px; margin-right: 0; }
 }
+/* Під час перетягування сторінка не «пружинить» і не прокручується пальцем. */
+html.is-dragging-chip, html.is-dragging-chip body { overscroll-behavior: none; touch-action: none; }

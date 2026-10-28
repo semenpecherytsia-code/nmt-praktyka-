@@ -18,7 +18,8 @@ export function Numeric({ q, value, onChange, onSubmit, disabled }: Props) {
         id={inputId}
         className={`numeric__input${error ? ' is-invalid' : ''}`}
         type="text"
-        inputMode="decimal"
+        inputMode="text"
+        autoCapitalize="off"
         autoComplete="off"
         autoCorrect="off"
         spellCheck={false}

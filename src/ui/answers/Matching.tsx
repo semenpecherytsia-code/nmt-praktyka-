@@ -19,6 +19,27 @@ export function Matching({ q, value, onChange, disabled }: Props) {
 
   useEffect(() => { if (disabled) setDrag(null); }, [disabled]);
 
+  // iOS і вбудовані браузери (Telegram тощо) тягнуть за пальцем усю сторінку або вікно,
+  // якщо не скасувати touch-події; React вішає їх пасивними, тому слухачі — нативні.
+  const rootRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root || disabled) return;
+    const onTouch = (e: TouchEvent) => {
+      const t = e.target as HTMLElement;
+      if (t.closest('.mchip') && !t.closest('.mchip__remove')) e.preventDefault();
+    };
+    root.addEventListener('touchstart', onTouch, { passive: false });
+    root.addEventListener('touchmove', onTouch, { passive: false });
+    return () => { root.removeEventListener('touchstart', onTouch); root.removeEventListener('touchmove', onTouch); };
+  }, [disabled]);
+  useEffect(() => {
+    if (!drag) return;
+    const html = document.documentElement;
+    html.classList.add('is-dragging-chip');
+    return () => html.classList.remove('is-dragging-chip');
+  }, [!!drag]);
+
   // Автопрокрутка сторінки, коли палець або курсор біля верхнього чи нижнього краю екрана.
   useEffect(() => {
     if (!drag?.moved) return;
@@ -87,7 +108,7 @@ export function Matching({ q, value, onChange, disabled }: Props) {
   const ghost = drag?.moved ? optionOf(drag.optId) : null;
 
   return (
-    <div className={`dnd${disabled ? ' is-locked' : ''}`}>
+    <div ref={rootRef} className={`dnd${disabled ? ' is-locked' : ''}`}>
       <div className="dnd__rows">
         {q.matchingRows.map((r, ri) => {
           const opt = pairs[r.id] ? optionOf(pairs[r.id]!) : null;
