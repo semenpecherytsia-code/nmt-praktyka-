@@ -52,67 +52,9 @@ def bar_chart():
 
 
 def flowerbed():
-    import math, random
-    rnd = random.Random(7)
-    cx, cy, R = 190, 190, 150
-    def rose(x, y, r):
-        g = f'<ellipse cx="{x-r*0.9:.1f}" cy="{y+r*0.6:.1f}" rx="{r*0.6:.1f}" ry="{r*0.32:.1f}" fill="#3F8F2F" transform="rotate(-30 {x-r*0.9:.1f} {y+r*0.6:.1f})"/>'
-        g += f'<circle cx="{x}" cy="{y}" r="{r}" fill="#D8202A"/>'
-        g += f'<circle cx="{x}" cy="{y}" r="{r*0.68:.1f}" fill="none" stroke="#A3121B" stroke-width="1.6"/>'
-        g += f'<path d="M{x-r*0.35:.1f},{y} a{r*0.35:.1f},{r*0.35:.1f} 0 1 1 {r*0.35:.1f},{r*0.35:.1f}" fill="none" stroke="#A3121B" stroke-width="1.6"/>'
-        g += f'<circle cx="{x-r*0.3:.1f}" cy="{y-r*0.35:.1f}" r="{r*0.22:.1f}" fill="#F0525A" opacity=".7"/>'
-        return g
-    def hydrangea(x, y, r):
-        g = f'<circle cx="{x}" cy="{y}" r="{r}" fill="#4F86E8"/>'
-        for k in range(9):
-            a = k * 40 + rnd.randint(0, 20)
-            d = r * (0.25 + 0.45 * (k % 3) / 2)
-            g += f'<circle cx="{x+d*math.cos(math.radians(a)):.1f}" cy="{y+d*math.sin(math.radians(a)):.1f}" r="{r*0.28:.1f}" fill="#9CC1FA" stroke="#3E6FCB" stroke-width=".8"/>'
-        return g
-    def peony(x, y, r):
-        g = f'<circle cx="{x}" cy="{y}" r="{r}" fill="#EE7FA8"/>'
-        for k in range(8):
-            a = math.radians(k * 45)
-            g += f'<circle cx="{x+r*0.55*math.cos(a):.1f}" cy="{y+r*0.55*math.sin(a):.1f}" r="{r*0.42:.1f}" fill="#F6A9C6"/>'
-        g += f'<circle cx="{x}" cy="{y}" r="{r*0.42:.1f}" fill="#FBD0E0"/><circle cx="{x}" cy="{y}" r="{r*0.18:.1f}" fill="#F7C948"/>'
-        return g
-    def field(clip, xs, ys, fn, r):
-        out = f'<g clip-path="url(#{clip})">'
-        for yy in ys:
-            for xx in xs:
-                out += fn(xx + rnd.randint(-5, 5) + (14 if (yy // 36) % 2 else 0), yy + rnd.randint(-5, 5), r + rnd.randint(-2, 2))
-        return out + '</g>'
-    b = ['<defs>',
-         f'<clipPath id="cl"><path d="M{cx},{cy-R+10} A{R-10},{R-10} 0 0 0 {cx},{cy+R-10} Z"/></clipPath>',
-         f'<clipPath id="ch"><path d="M{cx},{cy} L{cx},{cy-R+10} A{R-10},{R-10} 0 0 1 {cx+R-10},{cy} Z"/></clipPath>',
-         f'<clipPath id="cp"><path d="M{cx},{cy} L{cx+R-10},{cy} A{R-10},{R-10} 0 0 1 {cx},{cy+R-10} Z"/></clipPath>',
-         '</defs>']
-    for k in range(22):  # кущики навколо клумби
-        a = math.radians(k * 360 / 22 + rnd.randint(-6, 6))
-        rr = R + 10 + rnd.randint(0, 10)
-        b.append(f'<circle cx="{cx+rr*math.cos(a):.1f}" cy="{cy+rr*math.sin(a):.1f}" r="{rnd.randint(14, 22)}" fill="{rnd.choice(["#7CC36A", "#5FAE4E", "#9BD383"])}"/>')
-    b.append(f'<circle cx="{cx}" cy="{cy}" r="{R}" fill="#3D6B2A"/>')
-    b.append(field("cl", range(cx - 128, cx, 38), range(cy - 130, cy + 140, 36), rose, 16))
-    b.append(field("ch", range(cx + 24, cx + 140, 42), range(cy - 118, cy, 40), hydrangea, 18))
-    b.append(field("cp", range(cx + 24, cx + 140, 42), range(cy + 26, cy + 140, 40), peony, 18))
-    # бордюр із каменю
-    b.append(f'<circle cx="{cx}" cy="{cy}" r="{R}" fill="none" stroke="#EDE6D8" stroke-width="16"/>')
-    for k in range(32):
-        a = math.radians(k * 360 / 32)
-        b.append(f'<line x1="{cx+(R-8)*math.cos(a):.1f}" y1="{cy+(R-8)*math.sin(a):.1f}" x2="{cx+(R+8)*math.cos(a):.1f}" y2="{cy+(R+8)*math.sin(a):.1f}" stroke="#C9BFAE" stroke-width="1.5"/>')
-    b.append(f'<circle cx="{cx}" cy="{cy}" r="{R+8}" fill="none" stroke="#C9BFAE" stroke-width="1.5"/><circle cx="{cx}" cy="{cy}" r="{R-8}" fill="none" stroke="#C9BFAE" stroke-width="1.5"/>')
-    b.append(f'<line x1="{cx}" y1="{cy-R+8}" x2="{cx}" y2="{cy+R-8}" stroke="#EDE6D8" stroke-width="9"/>')
-    b.append(f'<line x1="{cx}" y1="{cy}" x2="{cx+R-8}" y2="{cy}" stroke="#EDE6D8" stroke-width="9"/>')
-    b.append(f'<circle cx="{cx}" cy="{cy}" r="16" fill="#EDE6D8" stroke="#C9BFAE" stroke-width="1.5"/>')
-    # легенда
-    items = [("#FDECEC", rose, "Троянди"), ("#E6F0FD", hydrangea, "Гортензії"), ("#FDECF3", peony, "Півонії")]
-    b.append('<rect x="378" y="96" width="160" height="196" rx="14" fill="#ffffff" stroke="#E3E7EE" stroke-width="1.5"/>')
-    for k, (bg, fn, name) in enumerate(items):
-        y = 108 + k * 60
-        b.append(f'<rect x="388" y="{y}" width="140" height="50" rx="10" fill="{bg}"/>')
-        b.append(fn(414, y + 25, 13))
-        b.append(f'<text x="440" y="{y+31}" font-size="17" font-weight="700" fill="#1F2A44" font-family="Inter, Arial, sans-serif">{name}</text>')
-    return svg("q03-flowerbed.svg", 550, 380, "".join(b))
+    """Оригінальний рисунок клумби з PDF (вбудоване зображення 250×195, збільшене до 1000×780)."""
+    shutil.copy("scripts/source-images/q03-flowerbed.jpg", OUT + "assets/q03-flowerbed.jpg")
+    return {"src": "assets/q03-flowerbed.jpg", "width": 560, "height": 437}
 
 
 def prism():
