@@ -29,9 +29,15 @@ export function routeHash(r: Route): string {
 export function navigate(r: Route, replace = false): void {
   const hash = routeHash(r);
   if (window.location.hash === hash) return;
-  if (replace) window.history.replaceState(null, '', hash);
-  else window.history.pushState(null, '', hash);
-  window.dispatchEvent(new HashChangeEvent('hashchange'));
+  try {
+    if (replace) window.history.replaceState(null, '', hash);
+    else window.history.pushState(null, '', hash);
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+  } catch {
+    // Деякі вбудовані рамки забороняють History API — тоді звичайна зміна hash.
+    if (replace) window.location.replace(hash);
+    else window.location.hash = hash;
+  }
 }
 
 export function useRoute(): Route {
