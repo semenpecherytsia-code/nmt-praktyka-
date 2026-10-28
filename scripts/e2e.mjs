@@ -421,8 +421,10 @@ for (const w of [360, 390]) {
     const small = await p.evaluate(() => [...document.querySelectorAll('button:not(:disabled), .choice, .mchip, input[type=text], a.btn')]
       .filter((e) => e.offsetParent !== null).map((e) => e.getBoundingClientRect()).filter((r) => r.height < 44 || r.width < 40).length);
     assert(small === 0, `${small} елементів менші за 44 px`);
-    await p.getByRole('button', { name: /22 \/ 22/ }).tap();
-    await p.locator('dialog[open]').getByRole('button', { name: 'Завершити симуляцію' }).tap();
+    assert(await p.getByRole('button', { name: 'Завершити', exact: true }).isVisible(), 'немає «Завершити» внизу на 22');
+    await p.locator('.mobile-finish').scrollIntoViewIfNeeded();
+    assert(await p.locator('.mobile-finish').isVisible(), 'кнопки завершення не видно');
+    await p.locator('.mobile-finish').tap();
     await p.getByRole('button', { name: 'Завершити та переглянути результат' }).tap();
     await p.waitForURL(/review$/);
     await noHScroll(p);

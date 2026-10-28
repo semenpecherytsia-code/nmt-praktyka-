@@ -119,7 +119,7 @@ img { max-width: 100%; height: auto; }
 .exam-bar__mobile { display: none; align-items: center; gap: 8px; }
 
 .exam-layout { display: grid; grid-template-columns: minmax(0, 1fr) var(--side-w); gap: 24px; align-items: start; }
-.question-col { min-width: 0; display: grid; gap: 16px; }
+.question-col { min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
 .exam-side { position: sticky; top: 16px; max-height: calc(100vh - 32px); overflow: auto; border-radius: var(--r-lg); }
 .side-card { padding: 20px; display: grid; gap: 16px; }
 .side-card__saved { font-size: 14px; color: var(--text-2); }
@@ -204,6 +204,7 @@ img { max-width: 100%; height: auto; }
 .mcell.is-conflict { background: var(--bad-bg); border: 2px dashed var(--bad); color: var(--bad); }
 .mcell:has(input:focus-visible) { outline: 3px solid var(--accent); outline-offset: 2px; }
 .icon-btn--sm { width: 44px; height: 44px; }
+.mobile-finish { display: none; }
 
 /* відповідності: перетягування */
 .dnd { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 16px 20px; align-items: start; }
@@ -354,8 +355,8 @@ a.brand:hover span { color: var(--accent-text); }
 .count--skipped { background: var(--skip-bg); border-color: #CBD5E1; color: var(--skip); }
 .result__actions { display: flex; gap: 12px; flex-wrap: wrap; }
 .filters { display: flex; gap: 8px; flex-wrap: wrap; position: sticky; top: 0; z-index: 2; padding: 12px 0; background: linear-gradient(var(--bg) 80%, transparent); }
-.review-list { display: grid; gap: 16px; }
-.rcard { padding: 28px 32px; display: grid; gap: 20px; scroll-margin-top: 72px; border-left-width: 5px; }
+.review-list { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.rcard { padding: 28px 32px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; min-width: 0; scroll-margin-top: 72px; border-left-width: 5px; }
 .rcard--correct { border-left-color: var(--ok); }
 .rcard--partial { border-left-color: var(--partial); }
 .rcard--wrong { border-left-color: var(--bad); }
@@ -412,11 +413,12 @@ a.brand:hover span { color: var(--accent-text); }
   html { scroll-padding-top: 76px; scroll-padding-bottom: 88px; }
   .exam-layout { grid-template-columns: minmax(0, 1fr); }
   .exam-side { display: none; }
-  .app--exam .topstrip--exam { display: none; }
+  .app--exam .topstrip--exam { height: 48px; }
   .exam-bar { position: sticky; top: 0; z-index: 10; margin: 0 calc(-1 * var(--gutter)) 16px; border-radius: 0; border-width: 0 0 1px; padding: 8px var(--gutter); min-height: 60px; }
   .exam-bar__mobile { display: flex; }
   .exam-bar__subject { display: none; }
   .review .exam-bar { position: static; }
+  .mobile-finish { display: inline-flex; margin-top: 16px; border-color: var(--bad-border); color: var(--bad); background: var(--surface); }
   .app--exam { padding-bottom: calc(88px + env(safe-area-inset-bottom)); }
   .mobile-actions { position: fixed; left: 0; right: 0; bottom: 0; z-index: 9; display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0; padding: 10px var(--gutter) calc(10px + env(safe-area-inset-bottom)); background: rgba(255, 255, 255, 0.96); border-top: 1px solid var(--border); backdrop-filter: blur(6px); }
   .mobile-actions .btn { flex: 1 1 0; min-width: 0; max-width: 180px; padding: 10px 12px; }
@@ -455,7 +457,7 @@ a.brand:hover span { color: var(--accent-text); }
   .ref-toolbar .btn--sm { padding: 0; width: 44px; height: 44px; min-height: 44px; }
   .ref-toolbar .btn--sm .show-xs { display: none; }
   .ref-toolbar__zoom { display: none; }
-  .exam-bar__title { display: none; }
+  .exam .exam-bar__title { display: none; }
   .exam-bar__mobile { flex: 1; justify-content: space-between; }
   .question__foot { gap: 12px; }
   .save-status--empty { display: none; }
@@ -483,6 +485,7 @@ a.brand:hover span { color: var(--accent-text); }
   .hide-xs { display: none; }
   .show-xs { display: inline; }
   .result, .rcard { padding: 20px 16px; }
+  .result__actions .btn { flex: 1 1 100%; }
   .result__score { grid-template-columns: 1fr; }
   .result__counts { grid-template-columns: 1fr 1fr; }
   .numeric-review { grid-template-columns: 1fr; }

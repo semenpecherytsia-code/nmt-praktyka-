@@ -227,14 +227,24 @@ export function ExamScreen(props: Props) {
             </div>
           </article>
 
+          <button type="button" className="btn btn--outline btn--block mobile-finish" onClick={props.requestFinish}>
+            <Square size={16} aria-hidden /> Завершити симуляцію
+          </button>
+
           <div className="mobile-actions" role="group" aria-label="Перехід між завданнями">
             <button type="button" className="btn btn--ghost" onClick={() => go(position - 1)} disabled={position <= 1} aria-label="Попереднє завдання">
               <ChevronLeft size={20} aria-hidden /> <span>Попереднє</span>
             </button>
             <span className="mobile-actions__pos" aria-hidden>{position} / {total}</span>
-            <button type="button" className="btn btn--ghost" onClick={() => go(position + 1)} disabled={position >= total} aria-label="Наступне завдання">
-              <span>Наступне</span> <ChevronRight size={20} aria-hidden />
-            </button>
+            {position < total ? (
+              <button type="button" className="btn btn--ghost" onClick={() => go(position + 1)} aria-label="Наступне завдання">
+                <span>Наступне</span> <ChevronRight size={20} aria-hidden />
+              </button>
+            ) : (
+              <button type="button" className="btn btn--primary" onClick={props.requestFinish}>
+                <span>Завершити</span>
+              </button>
+            )}
           </div>
         </main>
 
