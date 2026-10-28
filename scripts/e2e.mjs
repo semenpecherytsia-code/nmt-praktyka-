@@ -255,7 +255,7 @@ await step('результат: 13 з 32, лічильники та відсот
   const t = await page.locator('.result').innerText();
   assert(/13\s*з 32 первинних балів/.test(t), t);
   assert(t.includes('40,6 %'), 'відсоток');
-  assert(t.includes('Таблицю переведення ще не додано'), 'таблиця');
+  assert(/143/.test(t), 'немає бала НМТ 143: ' + t);
   const counts = await page.locator('.result__counts').innerText();
   assert(/5\s*повністю правильно/.test(counts) && /2\s*частково/.test(counts) && /1\s*неправильно/.test(counts) && /14\s*без відповіді/.test(counts), counts);
   const finished = await page.evaluate(() => JSON.parse(localStorage.getItem('nmt.v1.attempts')).map((id) => JSON.parse(localStorage.getItem('nmt.v1.attempt.' + id))).filter((a) => a.status === 'finished').length);
