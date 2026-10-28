@@ -54,6 +54,12 @@ def bar_chart():
 def flowerbed():
     """Оригінальний рисунок клумби з PDF (вбудоване зображення 250×195, збільшене до 1000×780)."""
     shutil.copy("scripts/source-images/q03-flowerbed.jpg", OUT + "assets/q03-flowerbed.jpg")
+    # Спроби, розпочаті раніше, зберігають знімок пакета з шляхом q03-flowerbed.svg — там той самий рисунок.
+    import base64
+    b64 = base64.b64encode(open("scripts/source-images/q03-flowerbed.jpg", "rb").read()).decode()
+    open(OUT + "assets/q03-flowerbed.svg", "w").write(
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 780" width="1000" height="780">'
+        f'<image width="1000" height="780" href="data:image/jpeg;base64,{b64}"/></svg>\n')
     return {"src": "assets/q03-flowerbed.jpg", "width": 560, "height": 437}
 
 
