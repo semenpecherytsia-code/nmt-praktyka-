@@ -205,6 +205,9 @@ img { max-width: 100%; height: auto; }
 .mcell:has(input:focus-visible) { outline: 3px solid var(--accent); outline-offset: 2px; }
 .icon-btn--sm { width: 44px; height: 44px; }
 .mobile-finish { display: none; }
+.btn--finish { border-color: var(--bad-border); color: var(--bad); background: var(--surface); }
+.btn--finish:hover { background: var(--bad-bg); }
+.start-card__lock { flex-basis: 100%; }
 
 /* відповідності: перетягування */
 .dnd { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 16px 20px; align-items: start; }
@@ -464,9 +467,13 @@ a.brand:hover span { color: var(--accent-text); }
   .question__title:focus-visible { outline: none; }
   .ref-view { padding: 8px; }
   .start-card { padding: 24px 20px; gap: 20px; }
-  .start-stats { grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  .start-stats > div { padding: 12px; }
-  .start-stats dd { font-size: 20px; }
+  .start-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .start-stats > div { min-width: 0; }
+  .start-stats dt { gap: 4px; }
+  .start-stats dt svg { display: none; }
+  .start-stats dt { font-size: 11.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .start-stats > div { padding: 10px; }
+  .start-stats dd { font-size: 18px; white-space: nowrap; }
   .start-stats dt { font-size: 12px; }
   .start-card__actions .btn { flex: 1 1 100%; }
   .history { padding: 20px; }

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { BookOpen, Clock, ListChecks, Play, RotateCcw, Target, Layers, Info, History } from 'lucide-react';
+import { BookOpen, Clock, ListChecks, Play, RotateCcw, Target, Layers, Info, History, Square } from 'lucide-react';
 import type { LoadedSet } from '../content/load';
 import type { Attempt } from '../engine/attempt';
 import { Dialog } from './Dialog';
@@ -15,6 +15,7 @@ interface Props {
   onStart: () => void;
   onContinue: () => void;
   onRestart: () => void;
+  onFinish: () => void;
   onOpenSelector: () => void;
   onOpenReference: () => void;
   onOpenDemo: () => void;
@@ -29,6 +30,7 @@ const TYPE_TEXT = {
 
 export function StartScreen(p: Props) {
   const [confirmRestart, setConfirmRestart] = useState(false);
+  const [confirmFinish, setConfirmFinish] = useState(false);
   const { set } = p;
 
   if (set.status !== 'available' || !set.pkg) {
@@ -83,6 +85,9 @@ export function StartScreen(p: Props) {
                 <Play size={18} aria-hidden /> Продовжити
               </button>
               <span className="start-card__left">Залишилось <strong className="tabular">{formatClock(left)}</strong></span>
+              <button type="button" className="btn btn--finish" onClick={() => setConfirmFinish(true)}>
+                <Square size={16} aria-hidden /> Завершити тест
+              </button>
               <button type="button" className="btn btn--ghost" onClick={() => setConfirmRestart(true)}>
                 <RotateCcw size={18} aria-hidden /> Почати заново
               </button>
@@ -95,7 +100,11 @@ export function StartScreen(p: Props) {
           <button type="button" className="btn btn--ghost" onClick={p.onOpenReference}>
             <BookOpen size={18} aria-hidden /> Довідкові матеріали
           </button>
-          <button type="button" className="btn btn--ghost" onClick={p.onOpenSelector}><Layers size={18} aria-hidden /> Обрати симуляцію</button>
+          {p.active ? (
+            <p className="hint start-card__lock">Щоб обрати іншу симуляцію, спочатку завершіть поточний тест.</p>
+          ) : (
+            <button type="button" className="btn btn--ghost" onClick={p.onOpenSelector}><Layers size={18} aria-hidden /> Обрати симуляцію</button>
+          )}
         </div>
 
         <h2 className="start-card__h2">Як це працює</h2>
@@ -126,6 +135,13 @@ export function StartScreen(p: Props) {
         </section>
       )}
 
+      <Dialog open={confirmFinish} onClose={() => setConfirmFinish(false)} title="Завершити тест?" titleId="finish-home-title" size="sm"
+        footer={<>
+          <button type="button" className="btn btn--ghost" onClick={() => setConfirmFinish(false)}>Скасувати</button>
+          <button type="button" className="btn btn--danger" onClick={() => { setConfirmFinish(false); p.onFinish(); }}>Так, завершити</button>
+        </>}>
+        <p>Тест буде завершено й оцінено. Зарахуються збережені відповіді та коректні незбережені чернетки. Продовжити цю спробу після завершення не можна.</p>
+      </Dialog>
       <Dialog open={confirmRestart} onClose={() => setConfirmRestart(false)} title="Почати заново?" titleId="restart-title" size="sm"
         footer={<>
           <button type="button" className="btn btn--ghost" onClick={() => setConfirmRestart(false)}>Скасувати</button>

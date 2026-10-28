@@ -87,7 +87,9 @@ function useOverlay(screen: 'prepare' | 'active' | 'review') {
 
 function Home({ data, simulationId }: { data: Data; simulationId?: string }) {
   const prefs = repo.prefs();
-  const requested = simulationId ?? prefs.selectedSimulationId ?? data.catalog.defaultSimulationId;
+  // Поки є незавершена спроба, головна завжди показує саме її симуляцію.
+  const running = repo.list().find((a) => a.status === 'active' && !isExpired(a, Date.now()) && data.sets.some((s) => s.entry.id === a.simulationId && s.pkg));
+  const requested = running?.simulationId ?? simulationId ?? prefs.selectedSimulationId ?? data.catalog.defaultSimulationId;
   const set = data.sets.find((s) => s.entry.id === requested) ?? data.sets.find((s) => s.entry.id === data.catalog.defaultSimulationId)!;
   const [overlay, send] = useOverlay('prepare');
   const [now, setNow] = useState(Date.now());
@@ -108,6 +110,7 @@ function Home({ data, simulationId }: { data: Data; simulationId?: string }) {
   const demoId = data.catalog.demoSimulationId && available.some((s) => s.entry.id === data.catalog.demoSimulationId) ? data.catalog.demoSimulationId : null;
 
   const pick = (id: string) => {
+    if (running) return;
     repo.setPrefs({ selectedSimulationId: id });
     send({ type: 'CLOSE' });
     navigate({ name: 'home', simulationId: id });
@@ -134,13 +137,23 @@ function Home({ data, simulationId }: { data: Data; simulationId?: string }) {
     start();
   };
 
+  const finishActive = () => {
+    const cur = repo.activeFor(simId);
+    if (!cur) return;
+    if (lease.state(cur.id) === 'other') { alert('Цю спробу відкрито в іншій вкладці. Завершіть її там.'); return; }
+    const pkg = contentFor(cur, data.sets);
+    if (!pkg) return;
+    repo.save(finishAttempt(cur, pkg, { now: Date.now(), reason: 'manual', applyDrafts: true }));
+    navigate({ name: 'review', attemptId: cur.id });
+  };
+
   const material = set.pkg?.referenceMaterials.find((r) => r.id === set.pkg!.simulation.referenceMaterialId) ?? null;
 
   return (
     <div className="app">
       <div className="topstrip"><Brand /></div>
       <StartScreen set={set} active={activeValid} finished={finished} availableCount={available.length} demoId={demoId} now={now}
-        onStart={start} onRestart={restart}
+        onStart={start} onRestart={restart} onFinish={finishActive}
         onContinue={() => activeValid && navigate({ name: 'attempt', attemptId: activeValid.id, position: 0 })}
         onOpenSelector={() => send({ type: 'OPEN_SELECTOR' })}
         onOpenReference={() => send({ type: 'OPEN_REFERENCE' })}

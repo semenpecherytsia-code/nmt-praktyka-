@@ -214,6 +214,10 @@ await step('перезавантаження: чернетка й позиція
   await page.goto(BASE + '#/');
   await page.getByRole('button', { name: 'Продовжити' }).waitFor();
   await page.getByText('Залишилось').waitFor();
+  assert(!(await page.getByRole('button', { name: 'Обрати симуляцію' }).count()), 'під час тесту можна обрати іншу симуляцію');
+  await page.getByRole('button', { name: 'Завершити тест' }).click();
+  await page.locator('dialog[open]').getByText('Завершити тест?').waitFor();
+  await page.locator('dialog[open]').getByRole('button', { name: 'Скасувати' }).click();
   await page.getByRole('button', { name: 'Продовжити' }).click();
   await page.waitForURL(/q\/20$/);
 });
@@ -396,6 +400,8 @@ for (const w of [360, 390]) {
   watch(p);
   await step(`${w}: старт, сітка в аркуші, відповідності дотиком, без горизонтальної прокрутки`, async () => {
     await p.goto(BASE + '#/sim/nmt-23');
+    await p.getByRole('button', { name: 'Розпочати симуляцію' }).waitFor();
+    await noHScroll(p);
     await p.getByRole('button', { name: 'Розпочати симуляцію' }).tap();
     await p.waitForURL(/q\/1$/);
     await noHScroll(p);
