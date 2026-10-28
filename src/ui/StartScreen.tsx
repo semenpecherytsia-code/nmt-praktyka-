@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { BookOpen, Clock, ListChecks, Play, RotateCcw, Target, Layers, Info, History, Square } from 'lucide-react';
+import { BookOpen, Clock, ListChecks, Play, RotateCcw, Target, Layers, Info, History } from 'lucide-react';
 import type { LoadedSet } from '../content/load';
 import type { Attempt } from '../engine/attempt';
 import { Dialog } from './Dialog';
@@ -86,7 +86,7 @@ export function StartScreen(p: Props) {
               </button>
               <span className="start-card__left">Залишилось <strong className="tabular">{formatClock(left)}</strong></span>
               <button type="button" className="btn btn--finish" onClick={() => setConfirmFinish(true)}>
-                <Square size={16} aria-hidden /> Завершити тест
+                Завершити тест
               </button>
               <button type="button" className="btn btn--ghost" onClick={() => setConfirmRestart(true)}>
                 <RotateCcw size={18} aria-hidden /> Почати заново

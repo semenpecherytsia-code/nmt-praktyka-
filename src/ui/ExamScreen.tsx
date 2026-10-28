@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { BookOpen, Check, ChevronLeft, ChevronRight, Flag, Flag as FlagIcon, Grid3x3, Lock, Square, PenLine, Clock } from 'lucide-react';
+import { BookOpen, Check, ChevronLeft, ChevronRight, Flag, Flag as FlagIcon, Grid3x3, Lock, PenLine, Clock } from 'lucide-react';
 import type { ContentPackage, Question } from '../content/types';
 import { type Attempt, commitAnswer, goTo, questionProgress, remainingMs, setDraft, summarize, toggleFlag, visibleAnswer, orderedQuestions } from '../engine/attempt';
 import { checkAnswer, filledPairs } from '../engine/answers';
@@ -228,7 +228,7 @@ export function ExamScreen(props: Props) {
           </article>
 
           <button type="button" className="btn btn--outline btn--block mobile-finish" onClick={props.requestFinish}>
-            <Square size={16} aria-hidden /> Завершити симуляцію
+            Завершити симуляцію
           </button>
 
           <div className="mobile-actions" role="group" aria-label="Перехід між завданнями">
@@ -264,7 +264,7 @@ export function ExamScreen(props: Props) {
               </button>
             </div>
             <button type="button" className="btn btn--outline btn--block" onClick={props.requestFinish}>
-              <Square size={16} aria-hidden /> Завершити симуляцію
+              Завершити симуляцію
             </button>
           </div>
         </aside>
@@ -276,7 +276,7 @@ export function ExamScreen(props: Props) {
         <QuestionGrid attempt={attempt} ordered={ordered} current={position} onGo={go} />
         <Legend />
         <button type="button" className="btn btn--outline btn--block" onClick={() => { setGridOpen(false); props.requestFinish(); }}>
-          <Square size={16} aria-hidden /> Завершити симуляцію
+          Завершити симуляцію
         </button>
       </Dialog>
 
