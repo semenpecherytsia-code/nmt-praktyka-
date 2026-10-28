@@ -1,13 +1,11 @@
-"""Набір «Симуляція НМТ 04.10.2026»: 22 завдання з PDF власника сайту, рисунки перемальовано у SVG."""
+"""Набір «Симуляція НМТ №23»: 22 завдання з PDF власника сайту («Симуляція НМТ 04.10.2026»), рисунки перемальовано у SVG."""
 import json, os, shutil
 
-SID = "nmt-0410"
+SID = "nmt-23"
 OUT = f"public/content/sets/{SID}/"
-P = "nmt0410"
+P = "nmt23"
 os.makedirs(OUT + "assets", exist_ok=True)
-os.makedirs(OUT + "reference", exist_ok=True)
-for f in os.listdir("public/content/sets/nmt-23/reference"):
-    shutil.copy(f"public/content/sets/nmt-23/reference/{f}", OUT + "reference/" + f)
+# reference/ (сторінки довідника й PDF) лежать у наборі як готові файли.
 
 INK = "#172033"
 FONT = 'font-family="Times New Roman, Georgia, serif"'
@@ -311,13 +309,19 @@ Q = [
     "Потрібно $5\\sin x=1-a$, $x\\neq\\dfrac{\\pi}{6}$. На $[0;\\,\\pi]$ $\\sin x\\in[0;\\,1]$, тому $0\\le 1-a\\le 5$, тобто $-4\\le a\\le 1$.\n\nПри $a=1$: $\\sin x=0$, корені $0$ і $\\pi$ підходять. Найбільше $a=1$."),
 ]
 
-sim = {"id": SID, "title": "Симуляція НМТ 04.10.2026", "subject": "Математика", "version": "1.0.0",
+SCORING = [{"id": "nmt-math-22", "questionCount": 22, "maxTotal": 32, "layout": [{"from": 1, "to": 15, "type": "single_choice", "maxPoints": 1, "optionCount": 5}, {"from": 16, "to": 18, "type": "matching", "maxPoints": 3, "rowCount": 3, "optionCount": 5}, {"from": 19, "to": 22, "type": "numeric", "maxPoints": 2}]}]
+REFERENCE = [{"id": "nmt-reference", "title": "Довідкові матеріали", "kind": "images", "pages": [{"src": "reference/page-1.png", "alt": "Довідкові матеріали, сторінка 1: таблиця квадратів, алгебра і початки аналізу"}, {"src": "reference/page-2.png", "alt": "Довідкові матеріали, сторінка 2: похідна, первісна, тригонометрія"}, {"src": "reference/page-3.png", "alt": "Довідкові матеріали, сторінка 3: геометрія, координати та вектори"}], "downloadSrc": "reference/dovidkovi-materialy.pdf"}]
+CONVERSION = [{"id": "nmt-math-2025", "year": 2025, "source": "Таблиця переведення тестових балів НМТ з математики у шкалу 100–200, вступ 2025 (додаток до Порядку прийому). Поріг «склав / не склав» — 5 тестових балів.", "maxPrimary": 32, "map": {"0": None, "1": None, "2": None, "3": None, "4": None, "5": 100, "6": 108, "7": 115, "8": 123, "9": 131, "10": 134, "11": 137, "12": 140, "13": 143, "14": 145, "15": 147, "16": 148, "17": 149, "18": 150, "19": 151, "20": 152, "21": 155, "22": 159, "23": 163, "24": 167, "25": 170, "26": 173, "27": 176, "28": 180, "29": 184, "30": 189, "31": 194, "32": 200}}]
+
+sim = {"id": SID, "title": "Симуляція НМТ №23", "subject": "Математика", "version": "3.0.0",
        "durationSeconds": 5400, "orderedQuestionIds": [q["id"] for q in Q], "referenceMaterialId": "nmt-reference",
        "scoringProfileId": "nmt-math-22", "conversionTableId": "nmt-math-2025", "readiness": "complete", "isDemo": False,
-       "source": {"kind": "imported", "note": "Завдання перенесено з PDF «Симуляція НМТ 04.10.2026», наданого власником сайту. Рисунки перемальовано."}}
-base = json.load(open("public/content/sets/nmt-23/package.json"))
+       "source": {"kind": "imported", "note": "Завдання перенесено з PDF, наданого власником сайту. Рисунки перемальовано."}}
 pkg = {"schemaVersion": 1, "simulation": sim, "questions": Q,
-       "scoringProfiles": base["scoringProfiles"], "referenceMaterials": base["referenceMaterials"],
-       "conversionTables": base["conversionTables"]}
+       "scoringProfiles": SCORING, "referenceMaterials": REFERENCE, "conversionTables": CONVERSION}
 json.dump(pkg, open(OUT + "package.json", "w"), ensure_ascii=False, indent=2)
 print(len(Q), "питань")
+
+cat = {"schemaVersion": 1, "defaultSimulationId": SID, "demoSimulationId": None, "entries": [
+    {"id": SID, "title": sim["title"], "package": f"sets/{SID}/package.json", "videoMap": None}]}
+json.dump(cat, open("public/content/catalog.json", "w"), ensure_ascii=False, indent=2)

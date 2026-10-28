@@ -71,7 +71,7 @@ describe('завершення', () => {
 
   it('за часом зараховує коректні чернетки, некоректні — ні', () => {
     let a = createAttempt(pkg, T0);
-    a = setDraft(a, 'nmt23-q19', { type: 'numeric', raw: '\u22123' });
+    a = setDraft(a, 'nmt23-q19', { type: 'numeric', raw: ' 6 ' });
     a = setDraft(a, 'nmt23-q20', { type: 'numeric', raw: '1.5.' });
     const f = finishAttempt(a, pkg, { now: a.deadlineAt + 3600_000, reason: 'timeout', applyDrafts: true });
     expect(f.result!.primary).toBe(2);

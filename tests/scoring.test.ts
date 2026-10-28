@@ -50,7 +50,7 @@ describe('оцінювання', () => {
 
   it('числова відповідь: 2 або 0, нуль — повноцінна відповідь', () => {
     const q = byId.get('nmt23-q19')!;
-    expect(scoreQuestion(q, 19, { type: 'numeric', raw: '\u22123' }).earned).toBe(2);
+    expect(scoreQuestion(q, 19, { type: 'numeric', raw: '6,0' }).earned).toBe(2);
     expect(scoreQuestion(q, 19, { type: 'numeric', raw: '0' })).toMatchObject({ earned: 0, status: 'wrong' });
     expect(scoreQuestion(q, 19, { type: 'numeric', raw: '' })).toMatchObject({ earned: 0, status: 'skipped' });
   });

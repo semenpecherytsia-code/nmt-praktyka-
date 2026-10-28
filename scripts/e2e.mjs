@@ -49,8 +49,6 @@ console.log('Компʼютер 1280 px');
 
 await step('стартовий екран: №23, логотип веде на головну, без сторонньої навігації', async () => {
   await page.goto(BASE);
-  await page.getByRole('heading', { name: 'Симуляція НМТ 04.10.2026' }).waitFor();
-  await page.goto(BASE + '#/sim/nmt-23');
   await page.getByRole('heading', { name: 'Симуляція НМТ №23' }).waitFor();
   const stats = await page.locator('.start-stats').innerText();
   assert(/22/.test(stats) && /90 хв/.test(stats) && /32/.test(stats), stats);
@@ -58,7 +56,7 @@ await step('стартовий екран: №23, логотип веде на �
   for (const bad of ['Matanschool', 'matanschool', 'Курси', 'Меню', 'Демонстраційний']) assert(!body.includes(bad), `знайдено «${bad}»`);
   assert(await page.locator('a.brand').getAttribute('href') === '#/', 'логотип не веде на головну');
   await page.getByRole('button', { name: 'Обрати симуляцію' }).click();
-  assert(await page.locator('.selector__item').count() === 2, 'у виборі не 2 набори');
+  assert(await page.locator('.selector__item').count() === 1, 'у виборі не 1 набір');
   await page.keyboard.press('Escape');
   await page.screenshot({ path: 'e2e-shots/01-home-1280.png', fullPage: true });
 });
@@ -99,7 +97,7 @@ await step('збереження: перехід на наступне, відп
   assert(await save.isDisabled(), 'кнопка активна без вводу');
   assert(!(await save.locator('svg').count()), 'на кнопці є значок');
   await page.locator('.choice').nth(0).click();
-  await page.locator('.choice').nth(1).click();
+  await page.locator('.choice').nth(2).click();
   assert(await page.locator('.choice.is-selected').count() === 1, 'обрано кілька варіантів');
   await save.click();
   await page.waitForURL(/q\/2$/);
@@ -111,7 +109,7 @@ await step('збереження: перехід на наступне, відп
   await page.getByRole('status').filter({ hasText: 'Змінити її не можна' }).waitFor();
   assert(!(await page.getByRole('button', { name: 'Зберегти відповідь' }).count()), 'кнопка збереження лишилася');
   await page.locator('.choice').nth(3).click({ force: true });
-  assert(await page.locator('.choice').nth(1).evaluate((e) => e.classList.contains('is-selected')), 'збережену відповідь змінено');
+  assert(await page.locator('.choice').nth(2).evaluate((e) => e.classList.contains('is-selected')), 'збережену відповідь змінено');
   const overflow = await page.locator('.choice__content').evaluateAll((els) => els.filter((e) => getComputedStyle(e).overflowY !== 'hidden').length);
   assert(overflow === 0, 'у варіантах можлива вертикальна прокрутка');
   await page.screenshot({ path: 'e2e-shots/04-exam-single-locked-1280.png' });
@@ -136,18 +134,18 @@ async function dragChip(letter, row) {
 await step('відповідності перетягуванням (16) і натисканням (17)', async () => {
   await page.locator('.exam-side .qcell').nth(15).click();
   await page.waitForURL(/q\/16$/);
-  await dragChip('Г', 1);
-  await page.getByRole('button', { name: 'Пункт 1: прибрати варіант Г' }).waitFor();
-  assert(!(await page.getByRole('button', { name: 'Варіант Г', exact: true }).count()), 'використаний варіант лишився в списку');
-  await dragChip('Б', 2);
-  await page.getByRole('button', { name: 'Варіант А', exact: true }).click();
-  await page.getByRole('button', { name: 'Пункт 3: поставити варіант А' }).click();
+  await dragChip('В', 1);
+  await page.getByRole('button', { name: 'Пункт 1: прибрати варіант В' }).waitFor();
+  assert(!(await page.getByRole('button', { name: 'Варіант В', exact: true }).count()), 'використаний варіант лишився в списку');
+  await dragChip('Г', 2);
+  await page.getByRole('button', { name: 'Варіант Б', exact: true }).click();
+  await page.getByRole('button', { name: 'Пункт 3: поставити варіант Б' }).click();
   await page.locator('.dnd__status', { hasText: 'Заповнено 3 з 3' }).waitFor();
   await page.screenshot({ path: 'e2e-shots/05-exam-matching-1280.png', fullPage: true });
   // прибрати й повернути
-  await page.getByRole('button', { name: 'Пункт 3: прибрати варіант А' }).click();
+  await page.getByRole('button', { name: 'Пункт 3: прибрати варіант Б' }).click();
   await page.locator('.dnd__status', { hasText: 'Заповнено 2 з 3' }).waitFor();
-  await dragChip('А', 3);
+  await dragChip('Б', 3);
   await page.getByRole('button', { name: 'Зберегти відповідь' }).click();
   await page.waitForURL(/q\/17$/);
   await page.getByRole('button', { name: 'Варіант В', exact: true }).click();
@@ -157,21 +155,22 @@ await step('відповідності перетягуванням (16) і на
   await page.waitForURL(/q\/18$/);
 });
 
-await step('відповідності клавіатурою (18) з повтором, 16 заблоковано', async () => {
+await step('відповідності клавіатурою (18), варіант не повторюється, 16 заблоковано', async () => {
   await page.getByRole('button', { name: 'Варіант Б', exact: true }).focus();
   await page.keyboard.press('Enter');
   await page.getByRole('button', { name: 'Пункт 1: поставити варіант Б' }).focus();
   await page.keyboard.press('Enter');
   await page.getByRole('button', { name: 'Пункт 1: прибрати варіант Б' }).waitFor();
   await dragChip('В', 2);
-  await dragChip('В', 3);
+  assert(!(await page.getByRole('button', { name: 'Варіант В', exact: true }).count()), 'варіант можна використати двічі');
+  await dragChip('А', 3);
   await page.locator('.dnd__status', { hasText: 'Заповнено 3 з 3' }).waitFor();
   assert(await page.getByRole('button', { name: 'Зберегти відповідь' }).isEnabled(), 'збереження вимкнене');
   await page.locator('.exam-side .qcell').nth(15).click();
   await page.waitForURL(/q\/16$/);
   await page.getByRole('status').filter({ hasText: 'Змінити її не можна' }).waitFor();
   assert(!(await page.locator('.mchip__remove').count()), 'збережену відповідність можна прибрати');
-  assert(await page.getByRole('button', { name: 'Варіант В', exact: true }).isDisabled(), 'варіанти активні');
+  assert(await page.getByRole('button', { name: 'Варіант А', exact: true }).isDisabled(), 'варіанти активні');
 });
 
 await step('числовий ввід: Unicode-мінус, кома, некоректний текст, дріб', async () => {
@@ -194,6 +193,9 @@ await step('числовий ввід: Unicode-мінус, кома, некор�
   await input.fill('abc');
   await go(22);
   await input.fill('3/8');
+  await input.blur();
+  assert(await page.getByRole('button', { name: 'Зберегти відповідь' }).isDisabled(), 'дріб приймається там, де його не дозволено');
+  await input.fill('1');
   await input.press('Enter');
   await page.getByRole('status').filter({ hasText: 'Змінити її не можна' }).waitFor();
   assert(await input.getAttribute('readonly') !== null, 'числове поле не заблоковане');
@@ -256,14 +258,14 @@ await step('завершення: точні лічильники й попер�
   await page.waitForURL(/review$/);
 });
 
-await step('результат: 13 з 32, лічильники та відсоток', async () => {
+await step('результат: 9 з 32, лічильники та відсоток', async () => {
   await page.getByRole('heading', { name: 'Результат' }).waitFor();
   const t = await page.locator('.result').innerText();
-  assert(/13\s*з 32 первинних балів/.test(t), t);
-  assert(t.includes('40,6 %'), 'відсоток');
-  assert(/143/.test(t), 'немає бала НМТ 143: ' + t);
+  assert(/9\s*з 32 первинних балів/.test(t), t);
+  assert(t.includes('28,1 %'), 'відсоток');
+  assert(/131/.test(t), 'немає бала НМТ 131: ' + t);
   const counts = await page.locator('.result__counts').innerText();
-  assert(/5\s*повністю правильно/.test(counts) && /2\s*частково/.test(counts) && /1\s*неправильно/.test(counts) && /14\s*без відповіді/.test(counts), counts);
+  assert(/3\s*повністю правильно/.test(counts) && /2\s*частково/.test(counts) && /3\s*неправильно/.test(counts) && /14\s*без відповіді/.test(counts), counts);
   const finished = await page.evaluate(() => JSON.parse(localStorage.getItem('nmt.v1.attempts')).map((id) => JSON.parse(localStorage.getItem('nmt.v1.attempt.' + id))).filter((a) => a.status === 'finished').length);
   assert(finished === 1, `завершених спроб ${finished}`);
   await page.screenshot({ path: 'e2e-shots/08-review-top-1280.png' });
@@ -274,7 +276,7 @@ await step('розбір: 22 картки, фільтри з вихідними 
   await page.getByRole('button', { name: /^Частково/ }).click();
   assert((await page.locator('.rcard h2').allInnerTexts()).join() === 'Завдання 17,Завдання 18', 'фільтр «Частково»');
   await page.getByRole('button', { name: /^Помилки/ }).click();
-  assert((await page.locator('.rcard h2').allInnerTexts()).join() === 'Завдання 2', 'фільтр «Помилки»');
+  assert((await page.locator('.rcard h2').allInnerTexts()).join() === 'Завдання 2,Завдання 19,Завдання 20', 'фільтр «Помилки»');
   await page.getByRole('button', { name: /^Без відповіді/ }).click();
   assert(await page.locator('.rcard').count() === 14, 'фільтр «Без відповіді»');
   assert((await page.locator('.rcard').filter({ hasText: 'Завдання 21' }).innerText()).includes('Відповідь не надано'), '21 має бути без відповіді');
@@ -282,7 +284,7 @@ await step('розбір: 22 картки, фільтри з вихідними 
   const c17 = await page.locator('#review-q-17').innerText();
   assert(c17.includes('Правильних відповідностей: 1 з 3') && c17.includes('1 бал з 3'), 'частковий бал 17');
   const c19 = await page.locator('#review-q-19').innerText();
-  assert(c19.includes('−3') && c19.includes('2 бали з 2'), '19');
+  assert(c19.includes('−3') && c19.includes('0 балів з 2'), '19');
   await page.locator('#review-q-17').scrollIntoViewIfNeeded();
   await page.screenshot({ path: 'e2e-shots/09-review-matching-1280.png' });
 });
@@ -294,26 +296,11 @@ await step('сітка розбору прокручує до картки', asy
   assert(top > -5 && top < 200, `картка 21 не у видимій зоні (${top})`);
 });
 
-await step('відео: лише свої кліпи, решта — «ще не додано», одночасно грає одне', async () => {
-  const v1 = page.locator('#review-q-1 video');
+await step('відео: доки його не додано, показується «ще не додано», без плеєрів', async () => {
   await page.locator('#review-q-1').scrollIntoViewIfNeeded();
-  await v1.waitFor();
-  assert((await v1.locator('source').getAttribute('src')).endsWith('clip-a.mp4'), 'не той кліп у 1');
-  assert(await page.locator('#review-q-1 track').count() === 1, 'немає субтитрів');
-  await page.locator('#review-q-2').scrollIntoViewIfNeeded();
-  const v2 = page.locator('#review-q-2 video');
-  await v2.waitFor();
-  assert((await v2.locator('source').getAttribute('src')).endsWith('clip-b.mp4'), 'не той кліп у 2');
-  assert(await page.locator('#review-q-3 .video--missing').innerText().then((t) => t.includes('Відеопояснення ще не додано')), '3 без позначки');
-  assert(await page.locator('video').count() <= 3, 'завантажено забагато плеєрів одразу');
-  await v1.evaluate((v) => { v.muted = true; return v.play(); });
-  await page.waitForTimeout(300);
-  await v2.evaluate((v) => { v.muted = true; return v.play(); });
-  await page.waitForTimeout(300);
-  assert(await v1.evaluate((v) => v.paused), 'попереднє відео не стало на паузу');
-  assert(!(await v1.evaluate((v) => v.autoplay)), 'автозапуск');
-  await page.locator('#review-q-1').scrollIntoViewIfNeeded();
-  await page.screenshot({ path: 'e2e-shots/10-review-video-1280.png' });
+  assert((await page.locator('#review-q-1 .video--missing').innerText()).includes('Відеопояснення ще не додано'), '1 без позначки');
+  assert(await page.locator('video').count() === 0, 'з’явився порожній плеєр');
+  await page.screenshot({ path: 'e2e-shots/10-review-q1-1280.png' });
 });
 
 await step('завершену спробу не можна змінити через адресу питання', async () => {
@@ -334,7 +321,7 @@ await step('«Пройти ще раз»: нова спроба, новий та
   assert(!(await page.getByText('Розв’язання').count()), 'розбір незавершеної спроби відкрився');
   await page.goto(BASE + '#/');
   await page.getByText('Попередні спроби').waitFor();
-  assert((await page.locator('.history').innerText()).includes('13 з 32'), 'старого результату немає');
+  assert((await page.locator('.history').innerText()).includes('9 з 32'), 'старого результату немає');
 });
 
 await step('друга вкладка з тією самою спробою отримує попередження', async () => {
@@ -353,7 +340,7 @@ await step('друга вкладка з тією самою спробою от
 await step('закінчення часу: одне автоматичне завершення із зарахуванням коректних чернеток', async () => {
   await page.goto(BASE + `#/attempt/${attempt2}/q/19`);
   await page.getByRole('button', { name: 'Працювати тут' }).click().catch(() => {});
-  await page.getByLabel('Ваша відповідь').fill('-3'); // чернетка без збереження
+  await page.getByLabel('Ваша відповідь').fill('6'); // чернетка без збереження
   await page.waitForTimeout(200);
   await page.evaluate((id) => {
     const k = 'nmt.v1.attempt.' + id;
