@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Карта відео (video-map.json)",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "simulationId",
+    "bindings",
+    "media"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "simulationId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,79}$"
+    },
+    "bindings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "questionId",
+          "explanationVideoId"
+        ],
+        "properties": {
+          "questionId": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,79}$"
+          },
+          "explanationVideoId": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,79}$"
+          },
+          "verifiedBy": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "media": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "readiness"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,79}$"
+          },
+          "kind": {
+            "enum": [
+              "video",
+              "embed"
+            ]
+          },
+          "title": {
+            "type": "string"
+          },
+          "localPath": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Шлях у ./media для розробки"
+          },
+          "publicUrl": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "https-адреса або відносний шлях у папці набору"
+          },
+          "poster": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "captions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "src",
+                "srclang",
+                "label"
+              ],
+              "properties": {
+                "src": {
+                  "type": "string"
+                },
+                "srclang": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "mimeType": {
+            "type": "string"
+          },
+          "readiness": {
+            "enum": [
+              "ready",
+              "needs_review",
+              "missing"
+            ]
+          },
+          "technicalTestClip": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
+}

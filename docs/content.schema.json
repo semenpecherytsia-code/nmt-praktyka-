@@ -1,0 +1,686 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nmt-praktyka.local/content.schema.json",
+  "title": "Пакет набору НМТ Практика (package.json)",
+  "description": "Документована схема. Повна перевірка (посилання, ключі, бали, формули, адреси) — npm run content:validate.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "simulation",
+    "questions",
+    "scoringProfiles",
+    "referenceMaterials"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "simulation": {
+      "type": "object",
+      "required": [
+        "id",
+        "title",
+        "subject",
+        "version",
+        "durationSeconds",
+        "orderedQuestionIds",
+        "referenceMaterialId",
+        "scoringProfileId",
+        "readiness",
+        "isDemo",
+        "source"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "title": {
+          "type": "string"
+        },
+        "subject": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "durationSeconds": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "orderedQuestionIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "referenceMaterialId": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/id"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "scoringProfileId": {
+          "$ref": "#/$defs/id"
+        },
+        "conversionTableId": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/id"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "readiness": {
+          "enum": [
+            "complete",
+            "incomplete",
+            "demo"
+          ]
+        },
+        "isDemo": {
+          "type": "boolean"
+        },
+        "source": {
+          "type": "object",
+          "required": [
+            "kind",
+            "note"
+          ],
+          "properties": {
+            "kind": {
+              "enum": [
+                "imported",
+                "demo"
+              ]
+            },
+            "note": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "questions": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "id",
+              "type",
+              "statement",
+              "maxPoints",
+              "answerKey",
+              "options"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "#/$defs/id"
+              },
+              "statement": {
+                "$ref": "#/$defs/rich"
+              },
+              "assets": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "kind",
+                    "src",
+                    "alt"
+                  ],
+                  "properties": {
+                    "id": {
+                      "$ref": "#/$defs/id"
+                    },
+                    "kind": {
+                      "const": "image"
+                    },
+                    "src": {
+                      "$ref": "#/$defs/url"
+                    },
+                    "alt": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "width": {
+                      "type": "integer"
+                    },
+                    "height": {
+                      "type": "integer"
+                    },
+                    "caption": {
+                      "$ref": "#/$defs/rich"
+                    }
+                  }
+                }
+              },
+              "maxPoints": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "textExplanation": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/rich"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "explanationVideoId": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/id"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "type": {
+                "const": "single_choice"
+              },
+              "options": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "content"
+                  ],
+                  "properties": {
+                    "id": {
+                      "$ref": "#/$defs/id"
+                    },
+                    "content": {
+                      "$ref": "#/$defs/rich"
+                    }
+                  }
+                },
+                "minItems": 2
+              },
+              "answerKey": {
+                "type": "object",
+                "required": [
+                  "optionId"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "optionId": {
+                    "$ref": "#/$defs/id"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "id",
+              "type",
+              "statement",
+              "maxPoints",
+              "answerKey",
+              "matchingRows",
+              "matchingOptions",
+              "allowOptionReuse"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "#/$defs/id"
+              },
+              "statement": {
+                "$ref": "#/$defs/rich"
+              },
+              "assets": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "kind",
+                    "src",
+                    "alt"
+                  ],
+                  "properties": {
+                    "id": {
+                      "$ref": "#/$defs/id"
+                    },
+                    "kind": {
+                      "const": "image"
+                    },
+                    "src": {
+                      "$ref": "#/$defs/url"
+                    },
+                    "alt": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "width": {
+                      "type": "integer"
+                    },
+                    "height": {
+                      "type": "integer"
+                    },
+                    "caption": {
+                      "$ref": "#/$defs/rich"
+                    }
+                  }
+                }
+              },
+              "maxPoints": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "textExplanation": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/rich"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "explanationVideoId": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/id"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "type": {
+                "const": "matching"
+              },
+              "matchingRows": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "content"
+                  ],
+                  "properties": {
+                    "id": {
+                      "$ref": "#/$defs/id"
+                    },
+                    "content": {
+                      "$ref": "#/$defs/rich"
+                    }
+                  }
+                },
+                "minItems": 1
+              },
+              "matchingOptions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "content"
+                  ],
+                  "properties": {
+                    "id": {
+                      "$ref": "#/$defs/id"
+                    },
+                    "content": {
+                      "$ref": "#/$defs/rich"
+                    }
+                  }
+                },
+                "minItems": 1
+              },
+              "allowOptionReuse": {
+                "type": "boolean"
+              },
+              "answerKey": {
+                "type": "object",
+                "required": [
+                  "pairs"
+                ],
+                "properties": {
+                  "pairs": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "$ref": "#/$defs/id"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "id",
+              "type",
+              "statement",
+              "maxPoints",
+              "answerKey",
+              "numericRule"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "#/$defs/id"
+              },
+              "statement": {
+                "$ref": "#/$defs/rich"
+              },
+              "assets": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "kind",
+                    "src",
+                    "alt"
+                  ],
+                  "properties": {
+                    "id": {
+                      "$ref": "#/$defs/id"
+                    },
+                    "kind": {
+                      "const": "image"
+                    },
+                    "src": {
+                      "$ref": "#/$defs/url"
+                    },
+                    "alt": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "width": {
+                      "type": "integer"
+                    },
+                    "height": {
+                      "type": "integer"
+                    },
+                    "caption": {
+                      "$ref": "#/$defs/rich"
+                    }
+                  }
+                }
+              },
+              "maxPoints": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "textExplanation": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/rich"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "explanationVideoId": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/id"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "type": {
+                "const": "numeric"
+              },
+              "numericRule": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "required": [
+                      "mode"
+                    ],
+                    "properties": {
+                      "mode": {
+                        "const": "exact"
+                      },
+                      "allowFractions": {
+                        "type": "boolean"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "required": [
+                      "mode",
+                      "tolerance"
+                    ],
+                    "properties": {
+                      "mode": {
+                        "const": "tolerance"
+                      },
+                      "tolerance": {
+                        "type": "string",
+                        "pattern": "^\\d+([.,]\\d+)?$"
+                      },
+                      "allowFractions": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                ]
+              },
+              "answerKey": {
+                "type": "object",
+                "required": [
+                  "value"
+                ],
+                "properties": {
+                  "value": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "scoringProfiles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "questionCount",
+          "maxTotal",
+          "layout"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/id"
+          },
+          "questionCount": {
+            "type": "integer"
+          },
+          "maxTotal": {
+            "type": "integer"
+          },
+          "layout": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "from",
+                "to",
+                "type",
+                "maxPoints"
+              ],
+              "properties": {
+                "from": {
+                  "type": "integer"
+                },
+                "to": {
+                  "type": "integer"
+                },
+                "type": {
+                  "enum": [
+                    "single_choice",
+                    "matching",
+                    "numeric"
+                  ]
+                },
+                "maxPoints": {
+                  "type": "integer"
+                },
+                "optionCount": {
+                  "type": "integer"
+                },
+                "rowCount": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "referenceMaterials": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "id",
+              "title",
+              "kind",
+              "src",
+              "downloadable"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "#/$defs/id"
+              },
+              "title": {
+                "type": "string"
+              },
+              "kind": {
+                "const": "pdf"
+              },
+              "src": {
+                "$ref": "#/$defs/url"
+              },
+              "downloadable": {
+                "type": "boolean"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "id",
+              "title",
+              "kind",
+              "pages"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "#/$defs/id"
+              },
+              "title": {
+                "type": "string"
+              },
+              "kind": {
+                "const": "pages"
+              },
+              "pages": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/rich"
+                },
+                "minItems": 1
+              },
+              "downloadSrc": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/url"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "conversionTables": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "year",
+          "source",
+          "maxPrimary",
+          "map"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/id"
+          },
+          "year": {
+            "type": "integer"
+          },
+          "source": {
+            "type": "string"
+          },
+          "maxPrimary": {
+            "type": "integer"
+          },
+          "map": {
+            "type": "object",
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 100,
+                  "maximum": 200
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,79}$"
+    },
+    "rich": {
+      "type": "string",
+      "description": "Обмежений текстовий формат: абзаци, $формула$, $$формула$$, **жирний**, *курсив*"
+    },
+    "url": {
+      "type": "string",
+      "description": "Відносний шлях у папці набору або https://"
+    }
+  }
+}

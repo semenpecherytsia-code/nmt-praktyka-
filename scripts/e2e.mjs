@@ -1,0 +1,428 @@
+// Наскрізна перевірка в Chromium (Playwright): npm run build && npm run e2e
+// Запускає `vite preview`, проходить сценарій і зберігає знімки екрана в ./e2e-shots.
+import { createRequire } from 'node:module';
+import { spawn } from 'node:child_process';
+import fs from 'node:fs';
+
+const require = createRequire(import.meta.url);
+const { chromium } = require('playwright');
+const PORT = 4179;
+const BASE = `http://localhost:${PORT}/`;
+fs.mkdirSync('e2e-shots', { recursive: true });
+
+const server = spawn(process.execPath, ['node_modules/vite/bin/vite.js', 'preview', '--port', String(PORT), '--strictPort'], { stdio: 'pipe' });
+await new Promise((res, rej) => {
+  const t = setTimeout(() => rej(new Error('preview не запустився')), 20000);
+  server.stdout.on('data', (d) => { if (String(d).includes(String(PORT))) { clearTimeout(t); res(); } });
+});
+
+let passed = 0;
+const failures = [];
+const consoleErrors = [];
+async function step(name, fn) {
+  try { await fn(); passed++; console.log('  ✓', name); }
+  catch (e) { failures.push(`${name}: ${e.message.split('\n')[0]}`); console.log('  ✗', name, '\n     ', e.message.split('\n').slice(0, 8).join('\n      ')); }
+}
+function assert(c, msg) { if (!c) throw new Error(msg); }
+
+const browser = await chromium.launch();
+function watch(page) {
+  page.setDefaultTimeout(8000);
+  page.on('console', (m) => { if (m.type() === 'error') consoleErrors.push(`${page.url()} ${m.text()}`); });
+  page.on('pageerror', (e) => consoleErrors.push(`${page.url()} pageerror ${e.message}`));
+}
+async function noHScroll(page) {
+  const { sw, iw } = await page.evaluate(() => ({ sw: document.documentElement.scrollWidth, iw: window.innerWidth }));
+  assert(sw <= iw, `горизонтальна прокрутка: ${sw} > ${iw}`);
+}
+const timerSeconds = async (page) => {
+  const t = (await page.locator('.exam-side .timer__value').innerText()).trim();
+  const p = t.split(':').map(Number);
+  return p.length === 3 ? p[0] * 3600 + p[1] * 60 + p[2] : p[0] * 60 + p[1];
+};
+
+// ---------- компʼютер 1280 ----------
+const ctx = await browser.newContext({ viewport: { width: 1280, height: 860 }, locale: 'uk-UA' });
+const page = await ctx.newPage();
+watch(page);
+console.log('Компʼютер 1280 px');
+
+await step('стартовий екран: №23 без набору, без сторонньої навігації', async () => {
+  await page.goto(BASE);
+  await page.getByRole('heading', { name: 'Симуляція НМТ №23' }).waitFor();
+  await page.getByText('Набір ще не додано.').waitFor();
+  const body = await page.locator('body').innerText();
+  for (const bad of ['Matanschool', 'matanschool', 'Курси', 'Меню', 'Прогрес']) assert(!body.includes(bad), `знайдено «${bad}»`);
+  await page.screenshot({ path: 'e2e-shots/01-home-not-added-1280.png' });
+});
+
+await step('вибір: відкривається демонстраційний набір із 22 / 90 хв / 32', async () => {
+  await page.getByRole('button', { name: 'Обрати симуляцію' }).click();
+  const items = page.locator('.selector__item');
+  assert(await items.count() === 1, `у виборі ${await items.count()} наборів`);
+  await items.first().click();
+  await page.getByRole('heading', { name: /Демонстраційний набір/ }).waitFor();
+  const stats = await page.locator('.start-stats').innerText();
+  assert(/22/.test(stats) && /90 хв/.test(stats) && /32/.test(stats), stats);
+  await page.screenshot({ path: 'e2e-shots/02-home-demo-1280.png', fullPage: true });
+});
+
+await step('довідник до старту: 3 сторінки з PDF, Escape, повернення фокуса, таймер не стартує', async () => {
+  const btn = page.getByRole('button', { name: 'Довідкові матеріали' });
+  await btn.click();
+  await page.getByText('Сторінка 1 з 3').waitFor({ timeout: 15000 });
+  await page.getByRole('button', { name: 'Наступна сторінка' }).click();
+  await page.getByText('Сторінка 2 з 3').waitFor();
+  await page.getByRole('button', { name: 'Збільшити' }).click();
+  await page.getByText('125 %').waitFor();
+  await page.waitForTimeout(400);
+  await page.screenshot({ path: 'e2e-shots/03-reference-1280.png' });
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(150);
+  assert(!(await page.locator('dialog[open]').count()), 'діалог не закрився');
+  assert(await btn.evaluate((el) => el === document.activeElement), 'фокус не повернувся');
+  const n = await page.evaluate(() => JSON.parse(localStorage.getItem('nmt.v1.attempts') || '[]').length);
+  assert(n === 0, 'спробу створено до старту');
+});
+
+let attemptId;
+await step('старт: 90 хвилин, 22 номери, перша стрілка вимкнена', async () => {
+  await page.getByRole('button', { name: 'Розпочати симуляцію' }).click();
+  await page.waitForURL(/#\/attempt\/.+\/q\/1$/);
+  attemptId = page.url().match(/attempt\/([^/]+)/)[1];
+  const s = await timerSeconds(page);
+  assert(s <= 5400 && s >= 5390, `таймер ${s}`);
+  assert(await page.locator('.exam-side .qcell').count() === 22, 'не 22 номери');
+  assert(await page.locator('.exam-side').getByRole('button', { name: 'Попереднє завдання' }).isDisabled(), 'стрілка «Попереднє» активна');
+  await page.getByText('Збережено відповідей:').first().waitFor();
+});
+
+await step('вибір, зміна і збереження відповіді (завдання 1)', async () => {
+  const save = page.getByRole('button', { name: 'Зберегти відповідь' });
+  assert(await save.isDisabled(), 'кнопка активна без вводу');
+  await page.locator('.choice').nth(0).click();
+  await page.locator('.choice').nth(1).click();
+  assert(await page.locator('.choice.is-selected').count() === 1, 'обрано кілька варіантів');
+  await save.click();
+  await page.getByRole('status').filter({ hasText: 'Відповідь збережено' }).waitFor();
+  assert(await save.isDisabled(), 'кнопка активна після збереження');
+  assert((await page.locator('.exam-side').innerText()).includes('1 із 22'), 'лічильник не 1 із 22');
+  await page.screenshot({ path: 'e2e-shots/04-exam-single-1280.png' });
+});
+
+await step('перехід стрілкою не обирає відповідь автоматично', async () => {
+  await page.locator('.exam-side').getByRole('button', { name: 'Наступне завдання' }).click();
+  await page.waitForURL(/q\/2$/);
+  assert(await page.locator('.choice.is-selected').count() === 0, 'щось обрано автоматично');
+  assert(await page.evaluate(() => document.activeElement?.tagName) === 'H1', 'фокус не на заголовку');
+  await page.locator('.choice').nth(0).click(); // свідомо неправильна відповідь
+  await page.getByRole('button', { name: 'Зберегти відповідь' }).click();
+  await page.getByRole('status').filter({ hasText: 'Відповідь збережено' }).waitFor();
+});
+
+await step('відповідності: повна (16) і неповна (17) з лічильником', async () => {
+  await page.locator('.exam-side .qcell').nth(15).click();
+  await page.waitForURL(/q\/16$/);
+  await page.getByLabel('Пункт 1 — варіант Г').check();
+  await page.getByLabel('Пункт 2 — варіант Б').check();
+  await page.getByLabel('Пункт 3 — варіант А').check();
+  await page.locator('.matching__count', { hasText: 'Заповнено 3 з 3' }).waitFor();
+  await page.getByRole('button', { name: 'Зберегти відповідь' }).click();
+  await page.locator('.exam-side .qcell').nth(16).click();
+  await page.waitForURL(/q\/17$/);
+  await page.getByLabel('Пункт 1 — варіант В').check();
+  await page.locator('.matching__count', { hasText: 'Заповнено 1 з 3' }).waitFor();
+  await page.getByRole('button', { name: 'Зберегти відповідь' }).click();
+  await page.getByRole('status').filter({ hasText: 'Відповідь збережено' }).waitFor();
+  await page.screenshot({ path: 'e2e-shots/05-exam-matching-1280.png', fullPage: true });
+});
+
+await step('відповідності клавіатурою (18) і заборона повтору в 16', async () => {
+  await page.locator('.exam-side .qcell').nth(17).click();
+  await page.getByLabel('Пункт 1 — варіант А').focus();
+  await page.keyboard.press('Space');
+  await page.keyboard.press('ArrowRight');
+  assert(await page.getByLabel('Пункт 1 — варіант Б').isChecked(), 'клавіатура не працює');
+  // 18 дозволяє повтор: два рядки з В — без помилки
+  await page.getByLabel('Пункт 2 — варіант В').check();
+  await page.getByLabel('Пункт 3 — варіант В').check();
+  assert(!(await page.locator('.field-error').filter({ hasText: 'обрано для кількох' }).count()), 'помилка повтору там, де повтор дозволено');
+  assert(await page.getByRole('button', { name: 'Зберегти відповідь' }).isEnabled(), 'збереження вимкнене');
+  // 16 забороняє повтор
+  await page.locator('.exam-side .qcell').nth(15).click();
+  await page.getByLabel('Пункт 2 — варіант Г').check();
+  await page.getByText(/обрано для кількох пунктів/).waitFor();
+  assert(await page.getByRole('button', { name: 'Зберегти відповідь' }).isDisabled(), 'дубль можна зберегти');
+  await page.getByLabel('Пункт 2 — варіант Б').check(); // повертаємо збережене
+  await page.getByRole('status').filter({ hasText: 'Відповідь збережено' }).waitFor();
+});
+
+await step('числовий ввід: Unicode-мінус, кома, некоректний текст, дріб', async () => {
+  const go = async (n) => { await page.locator('.exam-side .qcell').nth(n - 1).click(); await page.waitForURL(new RegExp(`q/${n}$`)); };
+  const input = page.getByLabel('Ваша відповідь');
+  await go(19);
+  await input.fill('  −3 ');
+  await page.getByRole('button', { name: 'Зберегти відповідь' }).click();
+  await page.getByRole('status').filter({ hasText: 'Відповідь збережено' }).waitFor();
+  await go(20);
+  await input.fill('1,5'); // лише чернетка
+  await go(21);
+  await input.fill('abc');
+  await input.blur();
+  await page.getByText(/Введіть ціле або десяткове число/).waitFor();
+  assert(await page.getByRole('button', { name: 'Зберегти відповідь' }).isDisabled(), 'некоректне число можна зберегти');
+  await input.fill('');
+  assert(await page.getByRole('button', { name: 'Зберегти відповідь' }).isDisabled(), 'порожнє поле можна зберегти');
+  await input.fill('Infinity');
+  assert(await page.getByRole('button', { name: 'Зберегти відповідь' }).isDisabled(), 'Infinity можна зберегти');
+  await input.fill('abc');
+  await go(22);
+  await input.fill('3/8');
+  await input.press('Enter');
+  await page.getByRole('status').filter({ hasText: 'Відповідь збережено' }).waitFor();
+  await page.screenshot({ path: 'e2e-shots/06-exam-numeric-1280.png' });
+});
+
+await step('позначка для перегляду', async () => {
+  await page.locator('.exam-side .qcell').nth(4).click();
+  const flag = page.getByRole('button', { name: 'Позначити для перегляду' });
+  await flag.click();
+  await page.locator('[aria-pressed="true"]').filter({ hasText: 'Позначено для перегляду' }).waitFor();
+  assert(await page.locator('.exam-side .qcell').nth(4).evaluate((e) => e.classList.contains('is-flagged')), 'немає прапорця в сітці');
+});
+
+await step('перезавантаження: чернетка й позиція зберігаються', async () => {
+  await page.locator('.exam-side .qcell').nth(19).click();
+  await page.reload();
+  await page.waitForURL(/q\/20$/);
+  assert(await page.getByLabel('Ваша відповідь').inputValue() === '1,5', 'чернетка зникла');
+  await page.goto(BASE + '#/');
+  await page.getByRole('button', { name: 'Продовжити' }).waitFor();
+  await page.getByText('Залишилось').waitFor();
+  await page.getByRole('button', { name: 'Продовжити' }).click();
+  await page.waitForURL(/q\/20$/);
+});
+
+await step('довідник під час тесту: таймер іде, Escape повертає фокус', async () => {
+  const before = await timerSeconds(page);
+  const btn = page.getByRole('button', { name: /Довідкові матеріали/ });
+  await btn.click();
+  await page.getByText('Сторінка 1 з 3').waitFor({ timeout: 15000 });
+  await page.waitForTimeout(2300);
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(150);
+  const after = await timerSeconds(page);
+  assert(before - after >= 2, `таймер стояв: ${before} → ${after}`);
+  assert(await btn.evaluate((el) => el === document.activeElement), 'фокус не повернувся');
+});
+
+await step('завершення: точні лічильники й попередження про чернетки', async () => {
+  await page.getByRole('button', { name: 'Завершити симуляцію' }).click();
+  const dlg = page.locator('dialog[open]');
+  await dlg.getByText('Завершити симуляцію?').waitFor();
+  const t = await dlg.innerText();
+  // збережено: 1,2,16,17,19,22 = 6; чернетки: 18 (кор.), 20 (кор.), 21 (некор.) = 3; порожні 13
+  assert(/Збережено\s*6\s*з 22/.test(t), 'збережено ≠ 6: ' + t);
+  assert(/Без відповіді\s*13/.test(t), 'без відповіді ≠ 13: ' + t);
+  assert(/Незбережені чернетки\s*3/.test(t), 'чернеток ≠ 3: ' + t);
+  assert(t.includes('1 чернетка некоректна'), 'немає згадки про некоректну чернетку');
+  await page.screenshot({ path: 'e2e-shots/07-finish-dialog-1280.png' });
+  await dlg.getByRole('button', { name: 'Продовжити тест' }).click();
+  await page.getByRole('button', { name: 'Завершити симуляцію' }).click();
+  await page.getByLabel(/Застосувати коректні чернетки \(2\)/).check();
+  const fin = page.getByRole('button', { name: 'Завершити та переглянути результат' });
+  await fin.dblclick();
+  await page.waitForURL(/review$/);
+});
+
+await step('результат: 13 з 32, лічильники та відсоток', async () => {
+  await page.getByRole('heading', { name: 'Результат' }).waitFor();
+  const t = await page.locator('.result').innerText();
+  assert(/13\s*з 32 первинних балів/.test(t), t);
+  assert(t.includes('40,6 %'), 'відсоток');
+  assert(t.includes('Таблицю переведення ще не додано'), 'таблиця');
+  const counts = await page.locator('.result__counts').innerText();
+  assert(/5\s*повністю правильно/.test(counts) && /2\s*частково/.test(counts) && /1\s*неправильно/.test(counts) && /14\s*без відповіді/.test(counts), counts);
+  const finished = await page.evaluate(() => JSON.parse(localStorage.getItem('nmt.v1.attempts')).map((id) => JSON.parse(localStorage.getItem('nmt.v1.attempt.' + id))).filter((a) => a.status === 'finished').length);
+  assert(finished === 1, `завершених спроб ${finished}`);
+  await page.screenshot({ path: 'e2e-shots/08-review-top-1280.png' });
+});
+
+await step('розбір: 22 картки, фільтри з вихідними номерами', async () => {
+  assert(await page.locator('.rcard').count() === 22, 'не 22 картки');
+  await page.getByRole('button', { name: /^Частково/ }).click();
+  assert((await page.locator('.rcard h2').allInnerTexts()).join() === 'Завдання 17,Завдання 18', 'фільтр «Частково»');
+  await page.getByRole('button', { name: /^Помилки/ }).click();
+  assert((await page.locator('.rcard h2').allInnerTexts()).join() === 'Завдання 2', 'фільтр «Помилки»');
+  await page.getByRole('button', { name: /^Без відповіді/ }).click();
+  assert(await page.locator('.rcard').count() === 14, 'фільтр «Без відповіді»');
+  assert((await page.locator('.rcard').filter({ hasText: 'Завдання 21' }).innerText()).includes('Відповідь не надано'), '21 має бути без відповіді');
+  await page.getByRole('button', { name: /^Усі/ }).click();
+  const c17 = await page.locator('#review-q-17').innerText();
+  assert(c17.includes('Правильних відповідностей: 1 з 3') && c17.includes('1 бал з 3'), 'частковий бал 17');
+  const c19 = await page.locator('#review-q-19').innerText();
+  assert(c19.includes('−3') && c19.includes('2 бали з 2'), '19');
+  await page.locator('#review-q-17').scrollIntoViewIfNeeded();
+  await page.screenshot({ path: 'e2e-shots/09-review-matching-1280.png' });
+});
+
+await step('сітка розбору прокручує до картки', async () => {
+  await page.locator('.exam-side .qcell').nth(20).click();
+  await page.waitForTimeout(700);
+  const top = await page.locator('#review-q-21').evaluate((e) => e.getBoundingClientRect().top);
+  assert(top > -5 && top < 200, `картка 21 не у видимій зоні (${top})`);
+});
+
+await step('відео: лише свої кліпи, решта — «ще не додано», одночасно грає одне', async () => {
+  const v1 = page.locator('#review-q-1 video');
+  await page.locator('#review-q-1').scrollIntoViewIfNeeded();
+  await v1.waitFor();
+  assert((await v1.locator('source').getAttribute('src')).endsWith('clip-a.mp4'), 'не той кліп у 1');
+  assert(await page.locator('#review-q-1 track').count() === 1, 'немає субтитрів');
+  await page.locator('#review-q-2').scrollIntoViewIfNeeded();
+  const v2 = page.locator('#review-q-2 video');
+  await v2.waitFor();
+  assert((await v2.locator('source').getAttribute('src')).endsWith('clip-b.mp4'), 'не той кліп у 2');
+  assert(await page.locator('#review-q-3 .video--missing').innerText().then((t) => t.includes('Відеопояснення ще не додано')), '3 без позначки');
+  assert(await page.locator('video').count() <= 3, 'завантажено забагато плеєрів одразу');
+  await v1.evaluate((v) => { v.muted = true; return v.play(); });
+  await page.waitForTimeout(300);
+  await v2.evaluate((v) => { v.muted = true; return v.play(); });
+  await page.waitForTimeout(300);
+  assert(await v1.evaluate((v) => v.paused), 'попереднє відео не стало на паузу');
+  assert(!(await v1.evaluate((v) => v.autoplay)), 'автозапуск');
+  await page.locator('#review-q-1').scrollIntoViewIfNeeded();
+  await page.screenshot({ path: 'e2e-shots/10-review-video-1280.png' });
+});
+
+await step('завершену спробу не можна змінити через адресу питання', async () => {
+  await page.goto(BASE + `#/attempt/${attemptId}/q/3`);
+  await page.waitForURL(/review$/);
+});
+
+let attempt2;
+await step('«Пройти ще раз»: нова спроба, новий таймер, старий результат зберігся', async () => {
+  await page.getByRole('button', { name: 'Пройти ще раз' }).first().click();
+  await page.waitForURL(/q\/1$/);
+  attempt2 = page.url().match(/attempt\/([^/]+)/)[1];
+  assert(attempt2 !== attemptId, 'та сама спроба');
+  assert(await timerSeconds(page) >= 5395, 'таймер не новий');
+  assert(await page.locator('.exam-side .qcell--saved').count() === 0, 'відповіді перенеслися');
+  await page.goto(BASE + `#/attempt/${attempt2}/review`);
+  await page.waitForURL(/q\/1$/);
+  assert(!(await page.getByText('Розв’язання').count()), 'розбір незавершеної спроби відкрився');
+  await page.goto(BASE + '#/');
+  await page.getByText('Попередні спроби').waitFor();
+  assert((await page.locator('.history').innerText()).includes('13 з 32'), 'старого результату немає');
+});
+
+await step('друга вкладка з тією самою спробою отримує попередження', async () => {
+  const p2 = await ctx.newPage();
+  watch(p2);
+  await page.goto(BASE + `#/attempt/${attempt2}/q/1`);
+  await page.waitForTimeout(300);
+  await p2.goto(BASE + `#/attempt/${attempt2}/q/1`);
+  await p2.getByText('Спробу відкрито в іншій вкладці').waitFor();
+  await p2.screenshot({ path: 'e2e-shots/11-second-tab-1280.png' });
+  await p2.getByRole('button', { name: 'Працювати тут' }).click();
+  await page.getByText('Спробу відкрито в іншій вкладці').waitFor({ timeout: 6000 });
+  await p2.close();
+});
+
+await step('закінчення часу: одне автоматичне завершення із зарахуванням коректних чернеток', async () => {
+  await page.goto(BASE + `#/attempt/${attempt2}/q/19`);
+  await page.getByRole('button', { name: 'Працювати тут' }).click().catch(() => {});
+  await page.getByLabel('Ваша відповідь').fill('-3'); // чернетка без збереження
+  await page.waitForTimeout(200);
+  await page.evaluate((id) => {
+    const k = 'nmt.v1.attempt.' + id;
+    const a = JSON.parse(localStorage.getItem(k));
+    a.deadlineAt = Date.now() + 1500; a.revision += 1;
+    localStorage.setItem(k, JSON.stringify(a));
+  }, attempt2);
+  await page.reload();
+  await page.waitForURL(/review$/, { timeout: 8000 });
+  const t = await page.locator('.result').innerText();
+  assert(t.includes('Час вичерпано'), 'немає позначки часу');
+  assert(/2\s*з 32/.test(t), 'чернетку не зараховано: ' + t.slice(0, 200));
+  await page.reload();
+  const finished = await page.evaluate(() => JSON.parse(localStorage.getItem('nmt.v1.attempts')).map((id) => JSON.parse(localStorage.getItem('nmt.v1.attempt.' + id))).filter((a) => a.status === 'finished').length);
+  assert(finished === 2, `завершених спроб ${finished}`);
+});
+
+await step('ширини 1440 і 768 без горизонтальної прокрутки', async () => {
+  await page.goto(BASE + '#/');
+  await page.getByRole('button', { name: 'Розпочати симуляцію' }).click();
+  await page.waitForURL(/q\/1$/);
+  for (const w of [1440, 768]) {
+    await page.setViewportSize({ width: w, height: 900 });
+    for (const n of [1, 14, 16, 5]) {
+      await page.goto(page.url().replace(/q\/\d+$/, `q/${n}`));
+      await page.waitForTimeout(150);
+      await noHScroll(page);
+    }
+    await page.goto(page.url().replace(/q\/\d+$/, 'q/16'));
+    await page.screenshot({ path: `e2e-shots/12-exam-matching-${w}.png`, fullPage: true });
+    await page.goto(BASE + `#/attempt/${attemptId}/review`);
+    await page.waitForTimeout(200);
+    await noHScroll(page);
+    await page.screenshot({ path: `e2e-shots/13-review-${w}.png` });
+    await page.goBack();
+    await page.waitForTimeout(150);
+  }
+});
+await ctx.close();
+
+// ---------- телефон ----------
+for (const w of [360, 390]) {
+  console.log(`Телефон ${w} px`);
+  const m = await browser.newContext({ viewport: { width: w, height: 760 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2, locale: 'uk-UA' });
+  const p = await m.newPage();
+  watch(p);
+  await step(`${w}: старт, сітка в аркуші, відповідності дотиком, без горизонтальної прокрутки`, async () => {
+    await p.goto(BASE + '#/sim/demo-tech');
+    await p.getByRole('button', { name: 'Розпочати симуляцію' }).tap();
+    await p.waitForURL(/q\/1$/);
+    await noHScroll(p);
+    await p.screenshot({ path: `e2e-shots/20-mobile-${w}-q1.png` });
+    await p.getByRole('button', { name: /1 \/ 22/ }).tap();
+    await p.locator('dialog[open] .qcell').nth(15).tap();
+    await p.waitForURL(/q\/16$/);
+    await p.getByLabel('Пункт 1 — варіант Г').tap();
+    await p.getByLabel('Пункт 2 — варіант Б').tap();
+    await p.locator('.matching__count', { hasText: 'Заповнено 2 з 3' }).waitFor();
+    await noHScroll(p);
+    await p.screenshot({ path: `e2e-shots/21-mobile-${w}-matching.png`, fullPage: true });
+    await p.getByRole('button', { name: 'Зберегти відповідь' }).tap();
+    await p.getByRole('button', { name: 'Наступне завдання' }).tap();
+    await p.waitForURL(/q\/17$/);
+    for (const n of [5, 9, 14, 22]) {
+      await p.goto(p.url().replace(/q\/\d+$/, `q/${n}`));
+      await p.waitForTimeout(150);
+      await noHScroll(p);
+    }
+    await p.screenshot({ path: `e2e-shots/22-mobile-${w}-numeric.png` });
+    const small = await p.evaluate(() => [...document.querySelectorAll('button, .choice, .mcell, input[type=text], a.btn')]
+      .filter((e) => e.offsetParent !== null).map((e) => e.getBoundingClientRect()).filter((r) => r.height < 44 || r.width < 40).length);
+    assert(small === 0, `${small} елементів менші за 44 px`);
+    await p.getByRole('button', { name: /22 \/ 22/ }).tap();
+    await p.locator('dialog[open]').getByRole('button', { name: 'Завершити симуляцію' }).tap();
+    await p.getByRole('button', { name: 'Завершити та переглянути результат' }).tap();
+    await p.waitForURL(/review$/);
+    await noHScroll(p);
+    await p.screenshot({ path: `e2e-shots/23-mobile-${w}-review.png` });
+    await p.locator('#review-nav-details summary').tap();
+    await p.locator('#review-nav-details .qcell').nth(15).tap();
+    await p.waitForTimeout(600);
+    await p.screenshot({ path: `e2e-shots/24-mobile-${w}-review-q16.png` });
+    await p.getByRole('button', { name: 'Довідкові матеріали' }).count().then((c) => assert(c === 0, 'довідник у розборі'));
+  });
+  await m.close();
+}
+
+await browser.close();
+server.kill();
+console.log(`\nПройдено кроків: ${passed}, помилок: ${failures.length}, помилок консолі: ${consoleErrors.length}`);
+consoleErrors.forEach((e) => console.log('  console:', e));
+failures.forEach((f) => console.log('  ✗', f));
+process.exit(failures.length || consoleErrors.length ? 1 : 0);

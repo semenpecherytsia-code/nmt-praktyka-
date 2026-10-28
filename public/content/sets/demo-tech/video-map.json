@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "simulationId": "demo-tech",
+  "bindings": [
+    {
+      "questionId": "demo-q01",
+      "explanationVideoId": "demo-clip-a",
+      "verifiedBy": "технічний тест, не пояснення"
+    },
+    {
+      "questionId": "demo-q02",
+      "explanationVideoId": "demo-clip-b",
+      "verifiedBy": "технічний тест, не пояснення"
+    }
+  ],
+  "media": [
+    {
+      "id": "demo-clip-a",
+      "kind": "video",
+      "title": "Технічний тестовий кліп A (не пояснення задачі)",
+      "publicUrl": "media/clip-a.mp4",
+      "poster": "media/clip-a.jpg",
+      "mimeType": "video/mp4",
+      "captions": [
+        {
+          "src": "media/clip-a.uk.vtt",
+          "srclang": "uk",
+          "label": "Українська"
+        }
+      ],
+      "readiness": "ready",
+      "technicalTestClip": true
+    },
+    {
+      "id": "demo-clip-b",
+      "kind": "video",
+      "title": "Технічний тестовий кліп B (не пояснення задачі)",
+      "publicUrl": "media/clip-b.mp4",
+      "poster": "media/clip-b.jpg",
+      "mimeType": "video/mp4",
+      "readiness": "ready",
+      "technicalTestClip": true
+    }
+  ]
+}
