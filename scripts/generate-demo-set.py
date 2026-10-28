@@ -90,7 +90,8 @@ vm={"schemaVersion":1,"simulationId":"nmt-23","bindings":[
   {"id":"demo-clip-a","kind":"video","title":"Технічний тестовий кліп A (не пояснення задачі)","publicUrl":"media/clip-a.mp4","poster":"media/clip-a.jpg","mimeType":"video/mp4","captions":[{"src":"media/clip-a.uk.vtt","srclang":"uk","label":"Українська"}],"readiness":"ready","technicalTestClip":True},
   {"id":"demo-clip-b","kind":"video","title":"Технічний тестовий кліп B (не пояснення задачі)","publicUrl":"media/clip-b.mp4","poster":"media/clip-b.jpg","mimeType":"video/mp4","readiness":"ready","technicalTestClip":True}]}
 json.dump(vm,open(out+"video-map.json","w"),ensure_ascii=False,indent=2)
-cat={"schemaVersion":1,"defaultSimulationId":"nmt-23","demoSimulationId":None,"entries":[
+cat={"schemaVersion":1,"defaultSimulationId":"nmt-0410","demoSimulationId":None,"entries":[
+  {"id":"nmt-0410","title":"Симуляція НМТ 04.10.2026","package":"sets/nmt-0410/package.json","videoMap":None},
   {"id":"nmt-23","title":"Симуляція НМТ №23","package":"sets/nmt-23/package.json","videoMap":"sets/nmt-23/video-map.json"}]}
 json.dump(cat,open("public/content/catalog.json","w"),ensure_ascii=False,indent=2)
 print(len(Q))

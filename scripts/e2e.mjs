@@ -49,6 +49,8 @@ console.log('Компʼютер 1280 px');
 
 await step('стартовий екран: №23, логотип веде на головну, без сторонньої навігації', async () => {
   await page.goto(BASE);
+  await page.getByRole('heading', { name: 'Симуляція НМТ 04.10.2026' }).waitFor();
+  await page.goto(BASE + '#/sim/nmt-23');
   await page.getByRole('heading', { name: 'Симуляція НМТ №23' }).waitFor();
   const stats = await page.locator('.start-stats').innerText();
   assert(/22/.test(stats) && /90 хв/.test(stats) && /32/.test(stats), stats);
@@ -56,7 +58,7 @@ await step('стартовий екран: №23, логотип веде на �
   for (const bad of ['Matanschool', 'matanschool', 'Курси', 'Меню', 'Демонстраційний']) assert(!body.includes(bad), `знайдено «${bad}»`);
   assert(await page.locator('a.brand').getAttribute('href') === '#/', 'логотип не веде на головну');
   await page.getByRole('button', { name: 'Обрати симуляцію' }).click();
-  assert(await page.locator('.selector__item').count() === 1, 'у виборі не 1 набір');
+  assert(await page.locator('.selector__item').count() === 2, 'у виборі не 2 набори');
   await page.keyboard.press('Escape');
   await page.screenshot({ path: 'e2e-shots/01-home-1280.png', fullPage: true });
 });

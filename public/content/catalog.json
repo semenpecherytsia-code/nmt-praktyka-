@@ -1,8 +1,14 @@
 {
   "schemaVersion": 1,
-  "defaultSimulationId": "nmt-23",
+  "defaultSimulationId": "nmt-0410",
   "demoSimulationId": null,
   "entries": [
+    {
+      "id": "nmt-0410",
+      "title": "Симуляція НМТ 04.10.2026",
+      "package": "sets/nmt-0410/package.json",
+      "videoMap": null
+    },
     {
       "id": "nmt-23",
       "title": "Симуляція НМТ №23",
