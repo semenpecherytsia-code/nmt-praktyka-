@@ -79,7 +79,7 @@ pkg={"schemaVersion":1,"simulation":sim,"questions":Q,
    {"from":1,"to":15,"type":"single_choice","maxPoints":1,"optionCount":5},
    {"from":16,"to":18,"type":"matching","maxPoints":3,"rowCount":3,"optionCount":5},
    {"from":19,"to":22,"type":"numeric","maxPoints":2}]}],
- "referenceMaterials":[{"id":"nmt-reference","title":"Довідкові матеріали","kind":"images","pages":[{"src":"reference/page-1.png","alt":"Довідкові матеріали, сторінка 1: таблиця квадратів, алгебра і початки аналізу"},{"src":"reference/page-2.png","alt":"Довідкові матеріали, сторінка 2: похідна, первісна, тригонометрія"},{"src":"reference/page-3.png","alt":"Довідкові матеріали, сторінка 3: геометрія, координати та вектори"}],"downloadSrc":"reference/dovidkovi-materialy.pdf"}],
+ "referenceMaterials":[{"id":"nmt-reference","title":"Довідкові матеріали","kind":"pdf","src":"reference/dovidkovi-materialy.pdf","downloadable":True}],
  "conversionTables":[]}
 out="public/content/sets/nmt-23/"
 json.dump(pkg,open(out+"package.json","w"),ensure_ascii=False,indent=2)

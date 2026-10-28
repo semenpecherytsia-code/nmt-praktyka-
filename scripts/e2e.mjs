@@ -65,7 +65,7 @@ await step('довідник до старту: 3 сторінки-зображ�
   const btn = page.getByRole('button', { name: 'Довідкові матеріали' });
   await btn.click();
   await page.getByText('Сторінка 1 з 3').waitFor({ timeout: 15000 });
-  await page.locator('dialog[open] img.ref-image').waitFor();
+  await page.locator('dialog[open] canvas').first().waitFor();
   await page.getByRole('button', { name: 'Наступна сторінка' }).click();
   await page.getByText('Сторінка 2 з 3').waitFor();
   await page.getByRole('button', { name: 'Збільшити' }).click();
