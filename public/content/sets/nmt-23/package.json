@@ -1,208 +1,208 @@
 {
   "schemaVersion": 1,
   "simulation": {
-    "id": "demo-tech",
-    "title": "Демонстраційний набір (технічна перевірка)",
+    "id": "nmt-23",
+    "title": "Симуляція НМТ №23",
     "subject": "Математика",
-    "version": "demo-1.0.0",
+    "version": "2.0.0",
     "durationSeconds": 5400,
     "orderedQuestionIds": [
-      "demo-q01",
-      "demo-q02",
-      "demo-q03",
-      "demo-q04",
-      "demo-q05",
-      "demo-q06",
-      "demo-q07",
-      "demo-q08",
-      "demo-q09",
-      "demo-q10",
-      "demo-q11",
-      "demo-q12",
-      "demo-q13",
-      "demo-q14",
-      "demo-q15",
-      "demo-q16",
-      "demo-q17",
-      "demo-q18",
-      "demo-q19",
-      "demo-q20",
-      "demo-q21",
-      "demo-q22"
+      "nmt23-q01",
+      "nmt23-q02",
+      "nmt23-q03",
+      "nmt23-q04",
+      "nmt23-q05",
+      "nmt23-q06",
+      "nmt23-q07",
+      "nmt23-q08",
+      "nmt23-q09",
+      "nmt23-q10",
+      "nmt23-q11",
+      "nmt23-q12",
+      "nmt23-q13",
+      "nmt23-q14",
+      "nmt23-q15",
+      "nmt23-q16",
+      "nmt23-q17",
+      "nmt23-q18",
+      "nmt23-q19",
+      "nmt23-q20",
+      "nmt23-q21",
+      "nmt23-q22"
     ],
-    "referenceMaterialId": "demo-reference",
+    "referenceMaterialId": "nmt-reference",
     "scoringProfileId": "nmt-math-22",
     "conversionTableId": null,
-    "readiness": "demo",
-    "isDemo": true,
+    "readiness": "complete",
+    "isDemo": false,
     "source": {
       "kind": "demo",
-      "note": "Власні прості задачі для перевірки всіх типів завдань. Це не симуляція НМТ №23 і не копія її змісту."
+      "note": "Задачі-приклади, складені для перевірки сайту (не офіційні завдання симуляції №23). Назву встановлено на прохання власника сайту."
     }
   },
   "questions": [
     {
-      "id": "demo-q01",
+      "id": "nmt23-q01",
       "type": "single_choice",
       "statement": "Обчисліть $\\dfrac{3}{4}+\\dfrac{1}{6}$.",
       "options": [
         {
-          "id": "demo-q01-o1",
+          "id": "nmt23-q01-o1",
           "content": "$\\dfrac{4}{10}$"
         },
         {
-          "id": "demo-q01-o2",
+          "id": "nmt23-q01-o2",
           "content": "$\\dfrac{11}{12}$"
         },
         {
-          "id": "demo-q01-o3",
+          "id": "nmt23-q01-o3",
           "content": "$\\dfrac{2}{3}$"
         },
         {
-          "id": "demo-q01-o4",
+          "id": "nmt23-q01-o4",
           "content": "$\\dfrac{1}{6}$"
         },
         {
-          "id": "demo-q01-o5",
+          "id": "nmt23-q01-o5",
           "content": "$1$"
         }
       ],
       "answerKey": {
-        "optionId": "demo-q01-o2"
+        "optionId": "nmt23-q01-o2"
       },
       "maxPoints": 1,
       "textExplanation": "Зведемо дроби до спільного знаменника 12:\n$\\dfrac{3}{4}=\\dfrac{9}{12}$, $\\dfrac{1}{6}=\\dfrac{2}{12}$.\n\nТоді $\\dfrac{9}{12}+\\dfrac{2}{12}=\\dfrac{11}{12}$."
     },
     {
-      "id": "demo-q02",
+      "id": "nmt23-q02",
       "type": "single_choice",
       "statement": "Розв’яжіть рівняння $2x-7=5$.",
       "options": [
         {
-          "id": "demo-q02-o1",
+          "id": "nmt23-q02-o1",
           "content": "$1$"
         },
         {
-          "id": "demo-q02-o2",
+          "id": "nmt23-q02-o2",
           "content": "$-1$"
         },
         {
-          "id": "demo-q02-o3",
+          "id": "nmt23-q02-o3",
           "content": "$6$"
         },
         {
-          "id": "demo-q02-o4",
+          "id": "nmt23-q02-o4",
           "content": "$12$"
         },
         {
-          "id": "demo-q02-o5",
+          "id": "nmt23-q02-o5",
           "content": "$3{,}5$"
         }
       ],
       "answerKey": {
-        "optionId": "demo-q02-o3"
+        "optionId": "nmt23-q02-o3"
       },
       "maxPoints": 1,
       "textExplanation": "Перенесемо $-7$ у праву частину: $2x=5+7=12$.\n\nПоділимо на 2: $x=6$."
     },
     {
-      "id": "demo-q03",
+      "id": "nmt23-q03",
       "type": "single_choice",
       "statement": "Спростіть вираз $\\dfrac{a^{5}\\cdot a^{-2}}{a^{2}}$, де $a\\neq 0$.",
       "options": [
         {
-          "id": "demo-q03-o1",
+          "id": "nmt23-q03-o1",
           "content": "$a$"
         },
         {
-          "id": "demo-q03-o2",
+          "id": "nmt23-q03-o2",
           "content": "$a^{5}$"
         },
         {
-          "id": "demo-q03-o3",
+          "id": "nmt23-q03-o3",
           "content": "$a^{-1}$"
         },
         {
-          "id": "demo-q03-o4",
+          "id": "nmt23-q03-o4",
           "content": "$a^{9}$"
         },
         {
-          "id": "demo-q03-o5",
+          "id": "nmt23-q03-o5",
           "content": "$a^{3}$"
         }
       ],
       "answerKey": {
-        "optionId": "demo-q03-o1"
+        "optionId": "nmt23-q03-o1"
       },
       "maxPoints": 1,
       "textExplanation": "За властивостями степенів: $a^{5}\\cdot a^{-2}=a^{5+(-2)}=a^{3}$.\n\nДалі $\\dfrac{a^{3}}{a^{2}}=a^{3-2}=a$."
     },
     {
-      "id": "demo-q04",
+      "id": "nmt23-q04",
       "type": "single_choice",
       "statement": "Обчисліть $\\log_{2}32$.",
       "options": [
         {
-          "id": "demo-q04-o1",
+          "id": "nmt23-q04-o1",
           "content": "$4$"
         },
         {
-          "id": "demo-q04-o2",
+          "id": "nmt23-q04-o2",
           "content": "$5$"
         },
         {
-          "id": "demo-q04-o3",
+          "id": "nmt23-q04-o3",
           "content": "$6$"
         },
         {
-          "id": "demo-q04-o4",
+          "id": "nmt23-q04-o4",
           "content": "$8$"
         },
         {
-          "id": "demo-q04-o5",
+          "id": "nmt23-q04-o5",
           "content": "$16$"
         }
       ],
       "answerKey": {
-        "optionId": "demo-q04-o2"
+        "optionId": "nmt23-q04-o2"
       },
       "maxPoints": 1,
       "textExplanation": "Потрібно знайти показник, у який треба піднести 2, щоб отримати 32.\n\n$2^{5}=32$, отже $\\log_{2}32=5$."
     },
     {
-      "id": "demo-q05",
+      "id": "nmt23-q05",
       "type": "single_choice",
       "statement": "На рисунку зображено прямокутний трикутник із катетами 6 і 8. Знайдіть довжину гіпотенузи $x$.",
       "options": [
         {
-          "id": "demo-q05-o1",
+          "id": "nmt23-q05-o1",
           "content": "$2\\sqrt{7}$"
         },
         {
-          "id": "demo-q05-o2",
+          "id": "nmt23-q05-o2",
           "content": "$10$"
         },
         {
-          "id": "demo-q05-o3",
+          "id": "nmt23-q05-o3",
           "content": "$12$"
         },
         {
-          "id": "demo-q05-o4",
+          "id": "nmt23-q05-o4",
           "content": "$14$"
         },
         {
-          "id": "demo-q05-o5",
+          "id": "nmt23-q05-o5",
           "content": "$48$"
         }
       ],
       "answerKey": {
-        "optionId": "demo-q05-o2"
+        "optionId": "nmt23-q05-o2"
       },
       "maxPoints": 1,
       "textExplanation": "За теоремою Піфагора: $x^{2}=6^{2}+8^{2}=36+64=100$.\n\nОтже, $x=\\sqrt{100}=10$.",
       "assets": [
         {
-          "id": "demo-q05-fig",
+          "id": "nmt23-q05-fig",
           "kind": "image",
           "src": "assets/right-triangle.svg",
           "alt": "Прямокутний трикутник: катети 6 і 8, гіпотенуза позначена x",
@@ -212,480 +212,480 @@
       ]
     },
     {
-      "id": "demo-q06",
+      "id": "nmt23-q06",
       "type": "single_choice",
       "statement": "Знайдіть площу круга радіуса 3.",
       "options": [
         {
-          "id": "demo-q06-o1",
+          "id": "nmt23-q06-o1",
           "content": "$3\\pi$"
         },
         {
-          "id": "demo-q06-o2",
+          "id": "nmt23-q06-o2",
           "content": "$6\\pi$"
         },
         {
-          "id": "demo-q06-o3",
+          "id": "nmt23-q06-o3",
           "content": "$9\\pi$"
         },
         {
-          "id": "demo-q06-o4",
+          "id": "nmt23-q06-o4",
           "content": "$18\\pi$"
         },
         {
-          "id": "demo-q06-o5",
+          "id": "nmt23-q06-o5",
           "content": "$36\\pi$"
         }
       ],
       "answerKey": {
-        "optionId": "demo-q06-o3"
+        "optionId": "nmt23-q06-o3"
       },
       "maxPoints": 1,
       "textExplanation": "Площа круга $S=\\pi r^{2}$.\n\n$S=\\pi\\cdot 3^{2}=9\\pi$."
     },
     {
-      "id": "demo-q07",
+      "id": "nmt23-q07",
       "type": "single_choice",
       "statement": "В арифметичній прогресії $a_{1}=2$, $d=3$. Знайдіть $a_{10}$.",
       "options": [
         {
-          "id": "demo-q07-o1",
+          "id": "nmt23-q07-o1",
           "content": "$27$"
         },
         {
-          "id": "demo-q07-o2",
+          "id": "nmt23-q07-o2",
           "content": "$29$"
         },
         {
-          "id": "demo-q07-o3",
+          "id": "nmt23-q07-o3",
           "content": "$30$"
         },
         {
-          "id": "demo-q07-o4",
+          "id": "nmt23-q07-o4",
           "content": "$32$"
         },
         {
-          "id": "demo-q07-o5",
+          "id": "nmt23-q07-o5",
           "content": "$35$"
         }
       ],
       "answerKey": {
-        "optionId": "demo-q07-o2"
+        "optionId": "nmt23-q07-o2"
       },
       "maxPoints": 1,
       "textExplanation": "Формула $n$-го члена: $a_{n}=a_{1}+(n-1)d$.\n\n$a_{10}=2+9\\cdot 3=29$."
     },
     {
-      "id": "demo-q08",
+      "id": "nmt23-q08",
       "type": "single_choice",
       "statement": "Обчисліть $\\sqrt{(-3)^{2}}+\\left|-5\\right|-2^{3}$.",
       "options": [
         {
-          "id": "demo-q08-o1",
+          "id": "nmt23-q08-o1",
           "content": "$-16$"
         },
         {
-          "id": "demo-q08-o2",
+          "id": "nmt23-q08-o2",
           "content": "$-6$"
         },
         {
-          "id": "demo-q08-o3",
+          "id": "nmt23-q08-o3",
           "content": "$0$"
         },
         {
-          "id": "demo-q08-o4",
+          "id": "nmt23-q08-o4",
           "content": "$6$"
         },
         {
-          "id": "demo-q08-o5",
+          "id": "nmt23-q08-o5",
           "content": "$16$"
         }
       ],
       "answerKey": {
-        "optionId": "demo-q08-o3"
+        "optionId": "nmt23-q08-o3"
       },
       "maxPoints": 1,
       "textExplanation": "$\\sqrt{(-3)^{2}}=\\sqrt{9}=3$, $\\left|-5\\right|=5$, $2^{3}=8$.\n\n$3+5-8=0$."
     },
     {
-      "id": "demo-q09",
+      "id": "nmt23-q09",
       "type": "single_choice",
       "statement": "Розв’яжіть нерівність $x^{2}-5x+6<0$.",
       "options": [
         {
-          "id": "demo-q09-o1",
+          "id": "nmt23-q09-o1",
           "content": "$(-\\infty;\\,2)\\cup(3;\\,+\\infty)$"
         },
         {
-          "id": "demo-q09-o2",
+          "id": "nmt23-q09-o2",
           "content": "$(2;\\,3)$"
         },
         {
-          "id": "demo-q09-o3",
+          "id": "nmt23-q09-o3",
           "content": "$[2;\\,3]$"
         },
         {
-          "id": "demo-q09-o4",
+          "id": "nmt23-q09-o4",
           "content": "$(-3;\\,-2)$"
         },
         {
-          "id": "demo-q09-o5",
+          "id": "nmt23-q09-o5",
           "content": "$(-\\infty;\\,3)$"
         }
       ],
       "answerKey": {
-        "optionId": "demo-q09-o2"
+        "optionId": "nmt23-q09-o2"
       },
       "maxPoints": 1,
       "textExplanation": "Корені рівняння $x^{2}-5x+6=0$: $x_{1}=2$, $x_{2}=3$.\n\nВітки параболи напрямлені вгору, тому вираз від’ємний між коренями. Нерівність строга, отже кінці не входять: $(2;\\,3)$."
     },
     {
-      "id": "demo-q10",
+      "id": "nmt23-q10",
       "type": "single_choice",
       "statement": "Гральний кубик кидають один раз. Яка ймовірність того, що випаде парне число очок?",
       "options": [
         {
-          "id": "demo-q10-o1",
+          "id": "nmt23-q10-o1",
           "content": "$\\dfrac{1}{6}$"
         },
         {
-          "id": "demo-q10-o2",
+          "id": "nmt23-q10-o2",
           "content": "$\\dfrac{1}{3}$"
         },
         {
-          "id": "demo-q10-o3",
+          "id": "nmt23-q10-o3",
           "content": "$\\dfrac{1}{2}$"
         },
         {
-          "id": "demo-q10-o4",
+          "id": "nmt23-q10-o4",
           "content": "$\\dfrac{2}{3}$"
         },
         {
-          "id": "demo-q10-o5",
+          "id": "nmt23-q10-o5",
           "content": "$\\dfrac{5}{6}$"
         }
       ],
       "answerKey": {
-        "optionId": "demo-q10-o3"
+        "optionId": "nmt23-q10-o3"
       },
       "maxPoints": 1,
       "textExplanation": "Усього рівноможливих наслідків 6. Сприятливі: 2, 4, 6 — їх 3.\n\n$P=\\dfrac{3}{6}=\\dfrac{1}{2}$."
     },
     {
-      "id": "demo-q11",
+      "id": "nmt23-q11",
       "type": "single_choice",
       "statement": "Обчисліть $\\sin 30^{\\circ}$.",
       "options": [
         {
-          "id": "demo-q11-o1",
+          "id": "nmt23-q11-o1",
           "content": "$0$"
         },
         {
-          "id": "demo-q11-o2",
+          "id": "nmt23-q11-o2",
           "content": "$\\dfrac{1}{2}$"
         },
         {
-          "id": "demo-q11-o3",
+          "id": "nmt23-q11-o3",
           "content": "$\\dfrac{\\sqrt{2}}{2}$"
         },
         {
-          "id": "demo-q11-o4",
+          "id": "nmt23-q11-o4",
           "content": "$\\dfrac{\\sqrt{3}}{2}$"
         },
         {
-          "id": "demo-q11-o5",
+          "id": "nmt23-q11-o5",
           "content": "$1$"
         }
       ],
       "answerKey": {
-        "optionId": "demo-q11-o2"
+        "optionId": "nmt23-q11-o2"
       },
       "maxPoints": 1,
       "textExplanation": "У прямокутному трикутнику з кутом $30^{\\circ}$ протилежний катет дорівнює половині гіпотенузи.\n\nТому $\\sin 30^{\\circ}=\\dfrac{1}{2}$."
     },
     {
-      "id": "demo-q12",
+      "id": "nmt23-q12",
       "type": "single_choice",
       "statement": "Знайдіть $f'(2)$, якщо $f(x)=x^{3}-4x$.",
       "options": [
         {
-          "id": "demo-q12-o1",
+          "id": "nmt23-q12-o1",
           "content": "$0$"
         },
         {
-          "id": "demo-q12-o2",
+          "id": "nmt23-q12-o2",
           "content": "$4$"
         },
         {
-          "id": "demo-q12-o3",
+          "id": "nmt23-q12-o3",
           "content": "$8$"
         },
         {
-          "id": "demo-q12-o4",
+          "id": "nmt23-q12-o4",
           "content": "$12$"
         },
         {
-          "id": "demo-q12-o5",
+          "id": "nmt23-q12-o5",
           "content": "$16$"
         }
       ],
       "answerKey": {
-        "optionId": "demo-q12-o3"
+        "optionId": "nmt23-q12-o3"
       },
       "maxPoints": 1,
       "textExplanation": "$f'(x)=3x^{2}-4$.\n\n$f'(2)=3\\cdot 4-4=8$."
     },
     {
-      "id": "demo-q13",
+      "id": "nmt23-q13",
       "type": "single_choice",
       "statement": "Знайдіть об’єм куба з ребром 3 см.",
       "options": [
         {
-          "id": "demo-q13-o1",
+          "id": "nmt23-q13-o1",
           "content": "$9\\ \\text{см}^{3}$"
         },
         {
-          "id": "demo-q13-o2",
+          "id": "nmt23-q13-o2",
           "content": "$18\\ \\text{см}^{3}$"
         },
         {
-          "id": "demo-q13-o3",
+          "id": "nmt23-q13-o3",
           "content": "$27\\ \\text{см}^{3}$"
         },
         {
-          "id": "demo-q13-o4",
+          "id": "nmt23-q13-o4",
           "content": "$54\\ \\text{см}^{3}$"
         },
         {
-          "id": "demo-q13-o5",
+          "id": "nmt23-q13-o5",
           "content": "$81\\ \\text{см}^{3}$"
         }
       ],
       "answerKey": {
-        "optionId": "demo-q13-o3"
+        "optionId": "nmt23-q13-o3"
       },
       "maxPoints": 1,
       "textExplanation": "Об’єм куба $V=a^{3}$.\n\n$V=3^{3}=27\\ \\text{см}^{3}$."
     },
     {
-      "id": "demo-q14",
+      "id": "nmt23-q14",
       "type": "single_choice",
       "statement": "Обчисліть значення виразу\n$$\\frac{\\left(2^{10}-2^{9}\\right)\\cdot 3^{4}}{2^{8}\\cdot 3^{3}+2^{8}\\cdot 3^{3}}$$",
       "options": [
         {
-          "id": "demo-q14-o1",
+          "id": "nmt23-q14-o1",
           "content": "$1$"
         },
         {
-          "id": "demo-q14-o2",
+          "id": "nmt23-q14-o2",
           "content": "$\\dfrac{3}{2}$"
         },
         {
-          "id": "demo-q14-o3",
+          "id": "nmt23-q14-o3",
           "content": "$2$"
         },
         {
-          "id": "demo-q14-o4",
+          "id": "nmt23-q14-o4",
           "content": "$3$"
         },
         {
-          "id": "demo-q14-o5",
+          "id": "nmt23-q14-o5",
           "content": "$6$"
         }
       ],
       "answerKey": {
-        "optionId": "demo-q14-o4"
+        "optionId": "nmt23-q14-o4"
       },
       "maxPoints": 1,
       "textExplanation": "Чисельник: $2^{10}-2^{9}=2^{9}(2-1)=2^{9}$, тому чисельник дорівнює $2^{9}\\cdot 3^{4}$.\n\nЗнаменник: $2^{8}\\cdot 3^{3}+2^{8}\\cdot 3^{3}=2\\cdot 2^{8}\\cdot 3^{3}=2^{9}\\cdot 3^{3}$.\n\n$$\\frac{2^{9}\\cdot 3^{4}}{2^{9}\\cdot 3^{3}}=3$$"
     },
     {
-      "id": "demo-q15",
+      "id": "nmt23-q15",
       "type": "single_choice",
       "statement": "Товар коштував 800 грн, а потім подешевшав на 15 %. Скільки гривень коштує товар після знижки?",
       "options": [
         {
-          "id": "demo-q15-o1",
+          "id": "nmt23-q15-o1",
           "content": "$120$"
         },
         {
-          "id": "demo-q15-o2",
+          "id": "nmt23-q15-o2",
           "content": "$660$"
         },
         {
-          "id": "demo-q15-o3",
+          "id": "nmt23-q15-o3",
           "content": "$680$"
         },
         {
-          "id": "demo-q15-o4",
+          "id": "nmt23-q15-o4",
           "content": "$685$"
         },
         {
-          "id": "demo-q15-o5",
+          "id": "nmt23-q15-o5",
           "content": "$785$"
         }
       ],
       "answerKey": {
-        "optionId": "demo-q15-o3"
+        "optionId": "nmt23-q15-o3"
       },
       "maxPoints": 1,
       "textExplanation": "15 % від 800 грн: $800\\cdot 0{,}15=120$ грн.\n\nНова ціна: $800-120=680$ грн."
     },
     {
-      "id": "demo-q16",
+      "id": "nmt23-q16",
       "type": "matching",
       "statement": "Установіть відповідність між виразом (1–3) та його значенням (А–Д).",
       "matchingRows": [
         {
-          "id": "demo-q16-r1",
+          "id": "nmt23-q16-r1",
           "content": "$\\sqrt{49}$"
         },
         {
-          "id": "demo-q16-r2",
+          "id": "nmt23-q16-r2",
           "content": "$2^{-1}$"
         },
         {
-          "id": "demo-q16-r3",
+          "id": "nmt23-q16-r3",
           "content": "$\\log_{3}1$"
         }
       ],
       "matchingOptions": [
         {
-          "id": "demo-q16-m1",
+          "id": "nmt23-q16-m1",
           "content": "$0$"
         },
         {
-          "id": "demo-q16-m2",
+          "id": "nmt23-q16-m2",
           "content": "$0{,}5$"
         },
         {
-          "id": "demo-q16-m3",
+          "id": "nmt23-q16-m3",
           "content": "$2$"
         },
         {
-          "id": "demo-q16-m4",
+          "id": "nmt23-q16-m4",
           "content": "$7$"
         },
         {
-          "id": "demo-q16-m5",
+          "id": "nmt23-q16-m5",
           "content": "$49$"
         }
       ],
       "allowOptionReuse": false,
       "answerKey": {
         "pairs": {
-          "demo-q16-r1": "demo-q16-m4",
-          "demo-q16-r2": "demo-q16-m2",
-          "demo-q16-r3": "demo-q16-m1"
+          "nmt23-q16-r1": "nmt23-q16-m4",
+          "nmt23-q16-r2": "nmt23-q16-m2",
+          "nmt23-q16-r3": "nmt23-q16-m1"
         }
       },
       "maxPoints": 3,
       "textExplanation": "1. $\\sqrt{49}=7$ — варіант Г.\n\n2. $2^{-1}=\\dfrac{1}{2}=0{,}5$ — варіант Б.\n\n3. $\\log_{3}1=0$, бо $3^{0}=1$ — варіант А."
     },
     {
-      "id": "demo-q17",
+      "id": "nmt23-q17",
       "type": "matching",
       "statement": "Установіть відповідність між рівнянням (1–3) та його коренем (А–Д).",
       "matchingRows": [
         {
-          "id": "demo-q17-r1",
+          "id": "nmt23-q17-r1",
           "content": "$3x=12$"
         },
         {
-          "id": "demo-q17-r2",
+          "id": "nmt23-q17-r2",
           "content": "$x-4=-6$"
         },
         {
-          "id": "demo-q17-r3",
+          "id": "nmt23-q17-r3",
           "content": "$\\dfrac{x}{2}=3$"
         }
       ],
       "matchingOptions": [
         {
-          "id": "demo-q17-m1",
+          "id": "nmt23-q17-m1",
           "content": "$-2$"
         },
         {
-          "id": "demo-q17-m2",
+          "id": "nmt23-q17-m2",
           "content": "$2$"
         },
         {
-          "id": "demo-q17-m3",
+          "id": "nmt23-q17-m3",
           "content": "$4$"
         },
         {
-          "id": "demo-q17-m4",
+          "id": "nmt23-q17-m4",
           "content": "$6$"
         },
         {
-          "id": "demo-q17-m5",
+          "id": "nmt23-q17-m5",
           "content": "$8$"
         }
       ],
       "allowOptionReuse": false,
       "answerKey": {
         "pairs": {
-          "demo-q17-r1": "demo-q17-m3",
-          "demo-q17-r2": "demo-q17-m1",
-          "demo-q17-r3": "demo-q17-m4"
+          "nmt23-q17-r1": "nmt23-q17-m3",
+          "nmt23-q17-r2": "nmt23-q17-m1",
+          "nmt23-q17-r3": "nmt23-q17-m4"
         }
       },
       "maxPoints": 3,
       "textExplanation": "1. $x=12:3=4$ — варіант В.\n\n2. $x=-6+4=-2$ — варіант А.\n\n3. $x=3\\cdot 2=6$ — варіант Г."
     },
     {
-      "id": "demo-q18",
+      "id": "nmt23-q18",
       "type": "matching",
       "statement": "Установіть відповідність між фігурою (1–3) та кількістю її осей симетрії (А–Д). **Один варіант може відповідати кільком рядкам.**",
       "matchingRows": [
         {
-          "id": "demo-q18-r1",
+          "id": "nmt23-q18-r1",
           "content": "квадрат"
         },
         {
-          "id": "demo-q18-r2",
+          "id": "nmt23-q18-r2",
           "content": "прямокутник, що не є квадратом"
         },
         {
-          "id": "demo-q18-r3",
+          "id": "nmt23-q18-r3",
           "content": "ромб, що не є квадратом"
         }
       ],
       "matchingOptions": [
         {
-          "id": "demo-q18-m1",
+          "id": "nmt23-q18-m1",
           "content": "$0$"
         },
         {
-          "id": "demo-q18-m2",
+          "id": "nmt23-q18-m2",
           "content": "$1$"
         },
         {
-          "id": "demo-q18-m3",
+          "id": "nmt23-q18-m3",
           "content": "$2$"
         },
         {
-          "id": "demo-q18-m4",
+          "id": "nmt23-q18-m4",
           "content": "$4$"
         },
         {
-          "id": "demo-q18-m5",
+          "id": "nmt23-q18-m5",
           "content": "безліч"
         }
       ],
       "allowOptionReuse": true,
       "answerKey": {
         "pairs": {
-          "demo-q18-r1": "demo-q18-m4",
-          "demo-q18-r2": "demo-q18-m3",
-          "demo-q18-r3": "demo-q18-m3"
+          "nmt23-q18-r1": "nmt23-q18-m4",
+          "nmt23-q18-r2": "nmt23-q18-m3",
+          "nmt23-q18-r3": "nmt23-q18-m3"
         }
       },
       "maxPoints": 3,
       "textExplanation": "1. Квадрат має 4 осі симетрії: дві діагоналі та дві прямі через середини протилежних сторін — варіант Г.\n\n2. Прямокутник, що не є квадратом, має 2 осі — прямі через середини протилежних сторін — варіант В.\n\n3. Ромб, що не є квадратом, має 2 осі — дві діагоналі — варіант В."
     },
     {
-      "id": "demo-q19",
+      "id": "nmt23-q19",
       "type": "numeric",
       "statement": "Розв’яжіть рівняння $5x+3=-12$.",
       "numericRule": {
@@ -698,7 +698,7 @@
       "textExplanation": "$5x=-12-3=-15$.\n\n$x=-15:5=-3$."
     },
     {
-      "id": "demo-q20",
+      "id": "nmt23-q20",
       "type": "numeric",
       "statement": "Обчисліть $0{,}25\\cdot 6$.",
       "numericRule": {
@@ -711,9 +711,9 @@
       "textExplanation": "$0{,}25\\cdot 6=\\dfrac{1}{4}\\cdot 6=\\dfrac{6}{4}=1{,}5$."
     },
     {
-      "id": "demo-q21",
+      "id": "nmt23-q21",
       "type": "numeric",
-      "statement": "Обчисліть довжину кола радіуса 1. Відповідь запишіть десятковим дробом. *Зараховується відповідь із похибкою не більше 0,01.*",
+      "statement": "Обчисліть довжину кола радіуса 1. Відповідь запишіть десятковим дробом. Зараховується відповідь із похибкою не більше 0,01.",
       "numericRule": {
         "mode": "tolerance",
         "tolerance": "0.01"
@@ -725,9 +725,9 @@
       "textExplanation": "Довжина кола $C=2\\pi r=2\\pi\\approx 6{,}2832$.\n\nЗа умовою допускається похибка 0,01, тому, наприклад, $6{,}28$ або $6{,}283$ зараховуються."
     },
     {
-      "id": "demo-q22",
+      "id": "nmt23-q22",
       "type": "numeric",
-      "statement": "У коробці 3 червоні та 5 синіх кульок. Навмання беруть одну кульку. Знайдіть імовірність того, що вона червона. *Відповідь можна записати звичайним дробом через «/» (наприклад, 1/4) або десятковим дробом.*",
+      "statement": "У коробці 3 червоні та 5 синіх кульок. Навмання беруть одну кульку. Знайдіть імовірність того, що вона червона. Відповідь можна записати звичайним дробом через «/» (наприклад, 1/4) або десятковим дробом.",
       "numericRule": {
         "mode": "exact",
         "allowFractions": true
@@ -771,11 +771,24 @@
   ],
   "referenceMaterials": [
     {
-      "id": "demo-reference",
-      "title": "Демонстраційний довідник",
-      "kind": "pdf",
-      "src": "reference/demo-reference.pdf",
-      "downloadable": true
+      "id": "nmt-reference",
+      "title": "Довідкові матеріали",
+      "kind": "images",
+      "pages": [
+        {
+          "src": "reference/page-1.png",
+          "alt": "Довідкові матеріали, сторінка 1: таблиця квадратів, алгебра і початки аналізу"
+        },
+        {
+          "src": "reference/page-2.png",
+          "alt": "Довідкові матеріали, сторінка 2: похідна, первісна, тригонометрія"
+        },
+        {
+          "src": "reference/page-3.png",
+          "alt": "Довідкові матеріали, сторінка 3: геометрія, координати та вектори"
+        }
+      ],
+      "downloadSrc": "reference/dovidkovi-materialy.pdf"
     }
   ],
   "conversionTables": []

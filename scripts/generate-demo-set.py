@@ -1,13 +1,13 @@
 import json
 L=['А','Б','В','Г','Д']
 def sc(n, statement, opts, correct, expl, assets=None):
-    q={"id":f"demo-q{n:02d}","type":"single_choice","statement":statement,
-       "options":[{"id":f"demo-q{n:02d}-o{i+1}","content":o} for i,o in enumerate(opts)],
-       "answerKey":{"optionId":f"demo-q{n:02d}-o{correct}"},"maxPoints":1,"textExplanation":expl}
+    q={"id":f"nmt23-q{n:02d}","type":"single_choice","statement":statement,
+       "options":[{"id":f"nmt23-q{n:02d}-o{i+1}","content":o} for i,o in enumerate(opts)],
+       "answerKey":{"optionId":f"nmt23-q{n:02d}-o{correct}"},"maxPoints":1,"textExplanation":expl}
     if assets: q["assets"]=assets
     return q
 def mt(n, statement, rows, opts, pairs, reuse, expl):
-    qid=f"demo-q{n:02d}"
+    qid=f"nmt23-q{n:02d}"
     return {"id":qid,"type":"matching","statement":statement,
       "matchingRows":[{"id":f"{qid}-r{i+1}","content":r} for i,r in enumerate(rows)],
       "matchingOptions":[{"id":f"{qid}-m{i+1}","content":o} for i,o in enumerate(opts)],
@@ -15,7 +15,7 @@ def mt(n, statement, rows, opts, pairs, reuse, expl):
       "answerKey":{"pairs":{f"{qid}-r{r}":f"{qid}-m{o}" for r,o in pairs}},
       "maxPoints":3,"textExplanation":expl}
 def nm(n, statement, value, rule, expl):
-    return {"id":f"demo-q{n:02d}","type":"numeric","statement":statement,"numericRule":rule,
+    return {"id":f"nmt23-q{n:02d}","type":"numeric","statement":statement,"numericRule":rule,
             "answerKey":{"value":value},"maxPoints":2,"textExplanation":expl}
 
 Q=[
@@ -30,7 +30,7 @@ Q=[
  sc(5,"На рисунку зображено прямокутний трикутник із катетами 6 і 8. Знайдіть довжину гіпотенузи $x$.",
     [r"$2\sqrt{7}$","$10$","$12$","$14$","$48$"],2,
     "За теоремою Піфагора: $x^{2}=6^{2}+8^{2}=36+64=100$.\n\nОтже, $x=\\sqrt{100}=10$.",
-    assets=[{"id":"demo-q05-fig","kind":"image","src":"assets/right-triangle.svg","alt":"Прямокутний трикутник: катети 6 і 8, гіпотенуза позначена x","width":420,"height":300}]),
+    assets=[{"id":"nmt23-q05-fig","kind":"image","src":"assets/right-triangle.svg","alt":"Прямокутний трикутник: катети 6 і 8, гіпотенуза позначена x","width":420,"height":300}]),
  sc(6,"Знайдіть площу круга радіуса 3.",[r"$3\pi$",r"$6\pi$",r"$9\pi$",r"$18\pi$",r"$36\pi$"],3,
     "Площа круга $S=\\pi r^{2}$.\n\n$S=\\pi\\cdot 3^{2}=9\\pi$."),
  sc(7,r"В арифметичній прогресії $a_{1}=2$, $d=3$. Знайдіть $a_{10}$.",["$27$","$29$","$30$","$32$","$35$"],2,
@@ -65,33 +65,32 @@ Q=[
     "$5x=-12-3=-15$.\n\n$x=-15:5=-3$."),
  nm(20,r"Обчисліть $0{,}25\cdot 6$.","1.5",{"mode":"exact"},
     "$0{,}25\\cdot 6=\\dfrac{1}{4}\\cdot 6=\\dfrac{6}{4}=1{,}5$."),
- nm(21,"Обчисліть довжину кола радіуса 1. Відповідь запишіть десятковим дробом. *Зараховується відповідь із похибкою не більше 0,01.*","6.28",{"mode":"tolerance","tolerance":"0.01"},
+ nm(21,"Обчисліть довжину кола радіуса 1. Відповідь запишіть десятковим дробом. Зараховується відповідь із похибкою не більше 0,01.","6.28",{"mode":"tolerance","tolerance":"0.01"},
     "Довжина кола $C=2\\pi r=2\\pi\\approx 6{,}2832$.\n\nЗа умовою допускається похибка 0,01, тому, наприклад, $6{,}28$ або $6{,}283$ зараховуються."),
- nm(22,"У коробці 3 червоні та 5 синіх кульок. Навмання беруть одну кульку. Знайдіть імовірність того, що вона червона. *Відповідь можна записати звичайним дробом через «/» (наприклад, 1/4) або десятковим дробом.*","3/8",{"mode":"exact","allowFractions":True},
+ nm(22,"У коробці 3 червоні та 5 синіх кульок. Навмання беруть одну кульку. Знайдіть імовірність того, що вона червона. Відповідь можна записати звичайним дробом через «/» (наприклад, 1/4) або десятковим дробом.","3/8",{"mode":"exact","allowFractions":True},
     "Усього кульок $3+5=8$, червоних — 3.\n\n$P=\\dfrac{3}{8}=0{,}375$."),
 ]
-sim={"id":"demo-tech","title":"Демонстраційний набір (технічна перевірка)","subject":"Математика","version":"demo-1.0.0",
- "durationSeconds":5400,"orderedQuestionIds":[q["id"] for q in Q],"referenceMaterialId":"demo-reference",
- "scoringProfileId":"nmt-math-22","conversionTableId":None,"readiness":"demo","isDemo":True,
- "source":{"kind":"demo","note":"Власні прості задачі для перевірки всіх типів завдань. Це не симуляція НМТ №23 і не копія її змісту."}}
+sim={"id":"nmt-23","title":"Симуляція НМТ №23","subject":"Математика","version":"2.0.0",
+ "durationSeconds":5400,"orderedQuestionIds":[q["id"] for q in Q],"referenceMaterialId":"nmt-reference",
+ "scoringProfileId":"nmt-math-22","conversionTableId":None,"readiness":"complete","isDemo":False,
+ "source":{"kind":"demo","note":"Задачі-приклади, складені для перевірки сайту (не офіційні завдання симуляції №23). Назву встановлено на прохання власника сайту."}}
 pkg={"schemaVersion":1,"simulation":sim,"questions":Q,
  "scoringProfiles":[{"id":"nmt-math-22","questionCount":22,"maxTotal":32,"layout":[
    {"from":1,"to":15,"type":"single_choice","maxPoints":1,"optionCount":5},
    {"from":16,"to":18,"type":"matching","maxPoints":3,"rowCount":3,"optionCount":5},
    {"from":19,"to":22,"type":"numeric","maxPoints":2}]}],
- "referenceMaterials":[{"id":"demo-reference","title":"Демонстраційний довідник","kind":"pdf","src":"reference/demo-reference.pdf","downloadable":True}],
+ "referenceMaterials":[{"id":"nmt-reference","title":"Довідкові матеріали","kind":"images","pages":[{"src":"reference/page-1.png","alt":"Довідкові матеріали, сторінка 1: таблиця квадратів, алгебра і початки аналізу"},{"src":"reference/page-2.png","alt":"Довідкові матеріали, сторінка 2: похідна, первісна, тригонометрія"},{"src":"reference/page-3.png","alt":"Довідкові матеріали, сторінка 3: геометрія, координати та вектори"}],"downloadSrc":"reference/dovidkovi-materialy.pdf"}],
  "conversionTables":[]}
-out="public/content/sets/demo-tech/"
+out="public/content/sets/nmt-23/"
 json.dump(pkg,open(out+"package.json","w"),ensure_ascii=False,indent=2)
-vm={"schemaVersion":1,"simulationId":"demo-tech","bindings":[
-  {"questionId":"demo-q01","explanationVideoId":"demo-clip-a","verifiedBy":"технічний тест, не пояснення"},
-  {"questionId":"demo-q02","explanationVideoId":"demo-clip-b","verifiedBy":"технічний тест, не пояснення"}],
+vm={"schemaVersion":1,"simulationId":"nmt-23","bindings":[
+  {"questionId":"nmt23-q01","explanationVideoId":"demo-clip-a","verifiedBy":"технічний тест, не пояснення"},
+  {"questionId":"nmt23-q02","explanationVideoId":"demo-clip-b","verifiedBy":"технічний тест, не пояснення"}],
  "media":[
   {"id":"demo-clip-a","kind":"video","title":"Технічний тестовий кліп A (не пояснення задачі)","publicUrl":"media/clip-a.mp4","poster":"media/clip-a.jpg","mimeType":"video/mp4","captions":[{"src":"media/clip-a.uk.vtt","srclang":"uk","label":"Українська"}],"readiness":"ready","technicalTestClip":True},
   {"id":"demo-clip-b","kind":"video","title":"Технічний тестовий кліп B (не пояснення задачі)","publicUrl":"media/clip-b.mp4","poster":"media/clip-b.jpg","mimeType":"video/mp4","readiness":"ready","technicalTestClip":True}]}
 json.dump(vm,open(out+"video-map.json","w"),ensure_ascii=False,indent=2)
-cat={"schemaVersion":1,"defaultSimulationId":"nmt-23","demoSimulationId":"demo-tech","entries":[
-  {"id":"nmt-23","title":"Симуляція НМТ №23","package":None,"videoMap":None},
-  {"id":"demo-tech","title":"Демонстраційний набір (технічна перевірка)","package":"sets/demo-tech/package.json","videoMap":"sets/demo-tech/video-map.json"}]}
+cat={"schemaVersion":1,"defaultSimulationId":"nmt-23","demoSimulationId":None,"entries":[
+  {"id":"nmt-23","title":"Симуляція НМТ №23","package":"sets/nmt-23/package.json","videoMap":"sets/nmt-23/video-map.json"}]}
 json.dump(cat,open("public/content/catalog.json","w"),ensure_ascii=False,indent=2)
 print(len(Q))

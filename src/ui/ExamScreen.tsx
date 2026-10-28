@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { BookOpen, Check, ChevronLeft, ChevronRight, Flag, Flag as FlagIcon, Grid3x3, Save, Square, PenLine, Clock } from 'lucide-react';
+import { BookOpen, Check, ChevronLeft, ChevronRight, Flag, Flag as FlagIcon, Grid3x3, Lock, Square, PenLine, Clock } from 'lucide-react';
 import type { ContentPackage, Question } from '../content/types';
 import { type Attempt, commitAnswer, goTo, questionProgress, remainingMs, setDraft, summarize, toggleFlag, visibleAnswer, orderedQuestions } from '../engine/attempt';
 import { checkAnswer, filledPairs } from '../engine/answers';
@@ -122,7 +122,6 @@ export function ExamScreen(props: Props) {
   const q = ordered[position - 1];
   const headingRef = useRef<HTMLHeadingElement>(null);
   const firstRender = useRef(true);
-  const [justSaved, setJustSaved] = useState<string | null>(null);
   const [gridOpen, setGridOpen] = useState(false);
 
   // Маршрут → поточне питання у спробі (щоб «Продовжити» відкривало те саме місце).
@@ -138,7 +137,6 @@ export function ExamScreen(props: Props) {
     h.focus({ preventScroll: true });
     const top = h.getBoundingClientRect().top;
     if (top < 72 || top > window.innerHeight * 0.6) h.scrollIntoView({ block: 'start', behavior: 'auto' });
-    setJustSaved(null);
   }, [position]);
 
   const go = (n: number) => {
@@ -155,16 +153,17 @@ export function ExamScreen(props: Props) {
   const flagged = attempt.flaggedQuestionIds.includes(q.id);
   const savedCount = ordered.filter((x) => attempt.committedAnswers[x.id]).length;
 
-  const onChange = (v: Parameters<typeof setDraft>[2]) => { setJustSaved(null); update((a) => setDraft(a, q.id, v)); };
+  const onChange = (v: Parameters<typeof setDraft>[2]) => { update((a) => setDraft(a, q.id, v)); };
   const save = () => {
     if (!canSave) return;
     const next = update((a) => commitAnswer(a, q));
-    if (next?.committedAnswers[q.id]) setJustSaved(q.id);
+    if (next?.committedAnswers[q.id]) {
+      if (position < total) go(position + 1);
+    }
   };
+  const locked = !!attempt.committedAnswers[q.id];
 
-  const statusText = justSaved === q.id && progress === 'saved'
-    ? 'Відповідь збережено'
-    : progress === 'saved' ? 'Відповідь збережено'
+  const statusText = locked ? 'Відповідь збережено. Змінити її не можна.'
     : progress === 'saved_with_changes' ? 'Є незбережені зміни — збережіть, щоб вони зарахувалися'
     : progress === 'draft_only' ? 'Відповідь ще не збережено'
     : '';
@@ -209,20 +208,22 @@ export function ExamScreen(props: Props) {
             {q.assets?.map((a) => <Figure key={a.id} asset={a} baseDir={baseDir} />)}
 
             <div className="question__answer">
-              {q.type === 'single_choice' && <SingleChoice q={q} value={value} onChange={onChange} labelledBy={headingId} />}
-              {q.type === 'matching' && <Matching q={q} value={value} onChange={onChange} labelledBy={headingId} />}
-              {q.type === 'numeric' && <Numeric key={q.id} q={q} value={value} onChange={onChange} onSubmit={save} />}
+              {q.type === 'single_choice' && <SingleChoice q={q} value={value} onChange={onChange} labelledBy={headingId} disabled={locked} />}
+              {q.type === 'matching' && <Matching q={q} value={value} onChange={onChange} disabled={locked} />}
+              {q.type === 'numeric' && <Numeric key={q.id} q={q} value={value} onChange={onChange} onSubmit={save} disabled={locked} />}
             </div>
 
             <div className="question__foot">
               <p className={`save-status save-status--${progress}`} role="status">
-                {statusText && (progress === 'saved' ? <Check size={16} aria-hidden /> : progress !== 'empty' ? <PenLine size={16} aria-hidden /> : null)}
+                {statusText && (locked ? <Lock size={16} aria-hidden /> : progress !== 'empty' ? <PenLine size={16} aria-hidden /> : null)}
                 <span>{statusText}</span>
                 {q.type === 'matching' && progress !== 'empty' && <span className="save-status__extra"> · заповнено {filledPairs(value)} з {q.matchingRows.length}</span>}
               </p>
-              <button type="button" className="btn btn--primary" onClick={save} disabled={!canSave}>
-                <Save size={18} aria-hidden /> Зберегти відповідь
-              </button>
+              {!locked && (
+                <button type="button" className="btn btn--primary" onClick={save} disabled={!canSave}>
+                  Зберегти відповідь
+                </button>
+              )}
             </div>
           </article>
 

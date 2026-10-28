@@ -47,30 +47,25 @@ const page = await ctx.newPage();
 watch(page);
 console.log('Компʼютер 1280 px');
 
-await step('стартовий екран: №23 без набору, без сторонньої навігації', async () => {
+await step('стартовий екран: №23, логотип веде на головну, без сторонньої навігації', async () => {
   await page.goto(BASE);
   await page.getByRole('heading', { name: 'Симуляція НМТ №23' }).waitFor();
-  await page.getByText('Набір ще не додано.').waitFor();
-  const body = await page.locator('body').innerText();
-  for (const bad of ['Matanschool', 'matanschool', 'Курси', 'Меню', 'Прогрес']) assert(!body.includes(bad), `знайдено «${bad}»`);
-  await page.screenshot({ path: 'e2e-shots/01-home-not-added-1280.png' });
-});
-
-await step('вибір: відкривається демонстраційний набір із 22 / 90 хв / 32', async () => {
-  await page.getByRole('button', { name: 'Обрати симуляцію' }).click();
-  const items = page.locator('.selector__item');
-  assert(await items.count() === 1, `у виборі ${await items.count()} наборів`);
-  await items.first().click();
-  await page.getByRole('heading', { name: /Демонстраційний набір/ }).waitFor();
   const stats = await page.locator('.start-stats').innerText();
   assert(/22/.test(stats) && /90 хв/.test(stats) && /32/.test(stats), stats);
-  await page.screenshot({ path: 'e2e-shots/02-home-demo-1280.png', fullPage: true });
+  const body = await page.locator('body').innerText();
+  for (const bad of ['Matanschool', 'matanschool', 'Курси', 'Меню', 'Демонстраційний']) assert(!body.includes(bad), `знайдено «${bad}»`);
+  assert(await page.locator('a.brand').getAttribute('href') === '#/', 'логотип не веде на головну');
+  await page.getByRole('button', { name: 'Обрати симуляцію' }).click();
+  assert(await page.locator('.selector__item').count() === 1, 'у виборі не 1 набір');
+  await page.keyboard.press('Escape');
+  await page.screenshot({ path: 'e2e-shots/01-home-1280.png', fullPage: true });
 });
 
-await step('довідник до старту: 3 сторінки з PDF, Escape, повернення фокуса, таймер не стартує', async () => {
+await step('довідник до старту: 3 сторінки-зображення, Escape, повернення фокуса, таймер не стартує', async () => {
   const btn = page.getByRole('button', { name: 'Довідкові матеріали' });
   await btn.click();
   await page.getByText('Сторінка 1 з 3').waitFor({ timeout: 15000 });
+  await page.locator('dialog[open] img.ref-image').waitFor();
   await page.getByRole('button', { name: 'Наступна сторінка' }).click();
   await page.getByText('Сторінка 2 з 3').waitFor();
   await page.getByRole('button', { name: 'Збільшити' }).click();
@@ -97,64 +92,84 @@ await step('старт: 90 хвилин, 22 номери, перша стріл�
   await page.getByText('Збережено відповідей:').first().waitFor();
 });
 
-await step('вибір, зміна і збереження відповіді (завдання 1)', async () => {
+await step('збереження: перехід на наступне, відповідь не змінюється (завдання 1)', async () => {
   const save = page.getByRole('button', { name: 'Зберегти відповідь' });
   assert(await save.isDisabled(), 'кнопка активна без вводу');
+  assert(!(await save.locator('svg').count()), 'на кнопці є значок');
   await page.locator('.choice').nth(0).click();
   await page.locator('.choice').nth(1).click();
   assert(await page.locator('.choice.is-selected').count() === 1, 'обрано кілька варіантів');
   await save.click();
-  await page.getByRole('status').filter({ hasText: 'Відповідь збережено' }).waitFor();
-  assert(await save.isDisabled(), 'кнопка активна після збереження');
-  assert((await page.locator('.exam-side').innerText()).includes('1 із 22'), 'лічильник не 1 із 22');
-  await page.screenshot({ path: 'e2e-shots/04-exam-single-1280.png' });
-});
-
-await step('перехід стрілкою не обирає відповідь автоматично', async () => {
-  await page.locator('.exam-side').getByRole('button', { name: 'Наступне завдання' }).click();
   await page.waitForURL(/q\/2$/);
+  assert((await page.locator('.exam-side').innerText()).includes('1 із 22'), 'лічильник не 1 із 22');
   assert(await page.locator('.choice.is-selected').count() === 0, 'щось обрано автоматично');
   assert(await page.evaluate(() => document.activeElement?.tagName) === 'H1', 'фокус не на заголовку');
+  await page.locator('.exam-side .qcell').nth(0).click();
+  await page.waitForURL(/q\/1$/);
+  await page.getByRole('status').filter({ hasText: 'Змінити її не можна' }).waitFor();
+  assert(!(await page.getByRole('button', { name: 'Зберегти відповідь' }).count()), 'кнопка збереження лишилася');
+  await page.locator('.choice').nth(3).click({ force: true });
+  assert(await page.locator('.choice').nth(1).evaluate((e) => e.classList.contains('is-selected')), 'збережену відповідь змінено');
+  const overflow = await page.locator('.choice__content').evaluateAll((els) => els.filter((e) => getComputedStyle(e).overflowY !== 'hidden').length);
+  assert(overflow === 0, 'у варіантах можлива вертикальна прокрутка');
+  await page.screenshot({ path: 'e2e-shots/04-exam-single-locked-1280.png' });
+  await page.locator('.exam-side .qcell').nth(1).click();
+  await page.waitForURL(/q\/2$/);
   await page.locator('.choice').nth(0).click(); // свідомо неправильна відповідь
   await page.getByRole('button', { name: 'Зберегти відповідь' }).click();
-  await page.getByRole('status').filter({ hasText: 'Відповідь збережено' }).waitFor();
+  await page.waitForURL(/q\/3$/);
 });
 
-await step('відповідності: повна (16) і неповна (17) з лічильником', async () => {
+async function dragChip(letter, row) {
+  const chip = page.getByRole('button', { name: `Варіант ${letter}`, exact: true });
+  const slot = page.locator('.dnd__slot').nth(row - 1);
+  const a = await chip.boundingBox(); const b = await slot.boundingBox();
+  await page.mouse.move(a.x + a.width / 2, a.y + a.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(a.x + a.width / 2 + 20, a.y + a.height / 2, { steps: 3 });
+  await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2, { steps: 8 });
+  await page.mouse.up();
+}
+
+await step('відповідності перетягуванням (16) і натисканням (17)', async () => {
   await page.locator('.exam-side .qcell').nth(15).click();
   await page.waitForURL(/q\/16$/);
-  await page.getByLabel('Пункт 1 — варіант Г').check();
-  await page.getByLabel('Пункт 2 — варіант Б').check();
-  await page.getByLabel('Пункт 3 — варіант А').check();
-  await page.locator('.matching__count', { hasText: 'Заповнено 3 з 3' }).waitFor();
-  await page.getByRole('button', { name: 'Зберегти відповідь' }).click();
-  await page.locator('.exam-side .qcell').nth(16).click();
-  await page.waitForURL(/q\/17$/);
-  await page.getByLabel('Пункт 1 — варіант В').check();
-  await page.locator('.matching__count', { hasText: 'Заповнено 1 з 3' }).waitFor();
-  await page.getByRole('button', { name: 'Зберегти відповідь' }).click();
-  await page.getByRole('status').filter({ hasText: 'Відповідь збережено' }).waitFor();
+  await dragChip('Г', 1);
+  await page.getByRole('button', { name: 'Пункт 1: прибрати варіант Г' }).waitFor();
+  assert(!(await page.getByRole('button', { name: 'Варіант Г', exact: true }).count()), 'використаний варіант лишився в списку');
+  await dragChip('Б', 2);
+  await page.getByRole('button', { name: 'Варіант А', exact: true }).click();
+  await page.getByRole('button', { name: 'Пункт 3: поставити варіант А' }).click();
+  await page.locator('.dnd__status', { hasText: 'Заповнено 3 з 3' }).waitFor();
   await page.screenshot({ path: 'e2e-shots/05-exam-matching-1280.png', fullPage: true });
+  // прибрати й повернути
+  await page.getByRole('button', { name: 'Пункт 3: прибрати варіант А' }).click();
+  await page.locator('.dnd__status', { hasText: 'Заповнено 2 з 3' }).waitFor();
+  await dragChip('А', 3);
+  await page.getByRole('button', { name: 'Зберегти відповідь' }).click();
+  await page.waitForURL(/q\/17$/);
+  await page.getByRole('button', { name: 'Варіант В', exact: true }).click();
+  await page.getByRole('button', { name: 'Пункт 1: поставити варіант В' }).click();
+  await page.locator('.dnd__status', { hasText: 'Заповнено 1 з 3' }).waitFor();
+  await page.getByRole('button', { name: 'Зберегти відповідь' }).click();
+  await page.waitForURL(/q\/18$/);
 });
 
-await step('відповідності клавіатурою (18) і заборона повтору в 16', async () => {
-  await page.locator('.exam-side .qcell').nth(17).click();
-  await page.getByLabel('Пункт 1 — варіант А').focus();
-  await page.keyboard.press('Space');
-  await page.keyboard.press('ArrowRight');
-  assert(await page.getByLabel('Пункт 1 — варіант Б').isChecked(), 'клавіатура не працює');
-  // 18 дозволяє повтор: два рядки з В — без помилки
-  await page.getByLabel('Пункт 2 — варіант В').check();
-  await page.getByLabel('Пункт 3 — варіант В').check();
-  assert(!(await page.locator('.field-error').filter({ hasText: 'обрано для кількох' }).count()), 'помилка повтору там, де повтор дозволено');
+await step('відповідності клавіатурою (18) з повтором, 16 заблоковано', async () => {
+  await page.getByRole('button', { name: 'Варіант Б', exact: true }).focus();
+  await page.keyboard.press('Enter');
+  await page.getByRole('button', { name: 'Пункт 1: поставити варіант Б' }).focus();
+  await page.keyboard.press('Enter');
+  await page.getByRole('button', { name: 'Пункт 1: прибрати варіант Б' }).waitFor();
+  await dragChip('В', 2);
+  await dragChip('В', 3);
+  await page.locator('.dnd__status', { hasText: 'Заповнено 3 з 3' }).waitFor();
   assert(await page.getByRole('button', { name: 'Зберегти відповідь' }).isEnabled(), 'збереження вимкнене');
-  // 16 забороняє повтор
   await page.locator('.exam-side .qcell').nth(15).click();
-  await page.getByLabel('Пункт 2 — варіант Г').check();
-  await page.getByText(/обрано для кількох пунктів/).waitFor();
-  assert(await page.getByRole('button', { name: 'Зберегти відповідь' }).isDisabled(), 'дубль можна зберегти');
-  await page.getByLabel('Пункт 2 — варіант Б').check(); // повертаємо збережене
-  await page.getByRole('status').filter({ hasText: 'Відповідь збережено' }).waitFor();
+  await page.waitForURL(/q\/16$/);
+  await page.getByRole('status').filter({ hasText: 'Змінити її не можна' }).waitFor();
+  assert(!(await page.locator('.mchip__remove').count()), 'збережену відповідність можна прибрати');
+  assert(await page.getByRole('button', { name: 'Варіант В', exact: true }).isDisabled(), 'варіанти активні');
 });
 
 await step('числовий ввід: Unicode-мінус, кома, некоректний текст, дріб', async () => {
@@ -163,8 +178,7 @@ await step('числовий ввід: Unicode-мінус, кома, некор�
   await go(19);
   await input.fill('  −3 ');
   await page.getByRole('button', { name: 'Зберегти відповідь' }).click();
-  await page.getByRole('status').filter({ hasText: 'Відповідь збережено' }).waitFor();
-  await go(20);
+  await page.waitForURL(/q\/20$/);
   await input.fill('1,5'); // лише чернетка
   await go(21);
   await input.fill('abc');
@@ -179,7 +193,8 @@ await step('числовий ввід: Unicode-мінус, кома, некор�
   await go(22);
   await input.fill('3/8');
   await input.press('Enter');
-  await page.getByRole('status').filter({ hasText: 'Відповідь збережено' }).waitFor();
+  await page.getByRole('status').filter({ hasText: 'Змінити її не можна' }).waitFor();
+  assert(await input.getAttribute('readonly') !== null, 'числове поле не заблоковане');
   await page.screenshot({ path: 'e2e-shots/06-exam-numeric-1280.png' });
 });
 
@@ -380,7 +395,7 @@ for (const w of [360, 390]) {
   const p = await m.newPage();
   watch(p);
   await step(`${w}: старт, сітка в аркуші, відповідності дотиком, без горизонтальної прокрутки`, async () => {
-    await p.goto(BASE + '#/sim/demo-tech');
+    await p.goto(BASE + '#/sim/nmt-23');
     await p.getByRole('button', { name: 'Розпочати симуляцію' }).tap();
     await p.waitForURL(/q\/1$/);
     await noHScroll(p);
@@ -388,13 +403,14 @@ for (const w of [360, 390]) {
     await p.getByRole('button', { name: /1 \/ 22/ }).tap();
     await p.locator('dialog[open] .qcell').nth(15).tap();
     await p.waitForURL(/q\/16$/);
-    await p.getByLabel('Пункт 1 — варіант Г').tap();
-    await p.getByLabel('Пункт 2 — варіант Б').tap();
-    await p.locator('.matching__count', { hasText: 'Заповнено 2 з 3' }).waitFor();
+    await p.getByRole('button', { name: 'Варіант Г', exact: true }).tap();
+    await p.getByRole('button', { name: 'Пункт 1: поставити варіант Г' }).tap();
+    await p.getByRole('button', { name: 'Варіант Б', exact: true }).tap();
+    await p.getByRole('button', { name: 'Пункт 2: поставити варіант Б' }).tap();
+    await p.locator('.dnd__status', { hasText: 'Заповнено 2 з 3' }).waitFor();
     await noHScroll(p);
     await p.screenshot({ path: `e2e-shots/21-mobile-${w}-matching.png`, fullPage: true });
     await p.getByRole('button', { name: 'Зберегти відповідь' }).tap();
-    await p.getByRole('button', { name: 'Наступне завдання' }).tap();
     await p.waitForURL(/q\/17$/);
     for (const n of [5, 9, 14, 22]) {
       await p.goto(p.url().replace(/q\/\d+$/, `q/${n}`));
@@ -402,7 +418,7 @@ for (const w of [360, 390]) {
       await noHScroll(p);
     }
     await p.screenshot({ path: `e2e-shots/22-mobile-${w}-numeric.png` });
-    const small = await p.evaluate(() => [...document.querySelectorAll('button, .choice, .mcell, input[type=text], a.btn')]
+    const small = await p.evaluate(() => [...document.querySelectorAll('button:not(:disabled), .choice, .mchip, input[type=text], a.btn')]
       .filter((e) => e.offsetParent !== null).map((e) => e.getBoundingClientRect()).filter((r) => r.height < 44 || r.width < 40).length);
     assert(small === 0, `${small} елементів менші за 44 px`);
     await p.getByRole('button', { name: /22 \/ 22/ }).tap();

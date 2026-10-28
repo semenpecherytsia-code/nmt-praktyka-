@@ -2,7 +2,7 @@
 
 Вміст повністю відокремлений від інтерфейсу. Умови, ключі, розв’язки й відео лежать у JSON-файлах
 `public/content/`, а не в коді компонентів. Формальна JSON-схема — [`content.schema.json`](content.schema.json);
-повний робочий приклад — [`public/content/sets/demo-tech/`](../public/content/sets/demo-tech/).
+повний робочий приклад — [`public/content/sets/nmt-23/`](../public/content/sets/nmt-23/).
 
 ```
 public/content/
@@ -33,7 +33,7 @@ simulationId → questionId → explanationVideoId → localPath (розробк
   "entries": [
     { "id": "nmt-23", "title": "Симуляція НМТ №23", "package": null, "videoMap": null },
     { "id": "demo-tech", "title": "Демонстраційний набір (технічна перевірка)",
-      "package": "sets/demo-tech/package.json", "videoMap": "sets/demo-tech/video-map.json" }
+      "package": "sets/nmt-23/package.json", "videoMap": "sets/nmt-23/video-map.json" }
   ]
 }
 ```
@@ -54,7 +54,7 @@ simulationId → questionId → explanationVideoId → localPath (розробк
 | `simulation.isDemo`, `source` | Демонстраційний набір має `isDemo: true` і назву «Демонстраційний набір…» без номера |
 | `questions[]` | Питання (див. нижче) |
 | `scoringProfiles[]` | Розкладка позицій, напр. 1–15 single_choice×1, 16–18 matching×3, 19–22 numeric×2 = 32 |
-| `referenceMaterials[]` | `{"kind":"pdf","src":"reference/x.pdf","downloadable":true}` або `{"kind":"pages","pages":["…"]}` |
+| `referenceMaterials[]` | `{"kind":"pdf","src":"reference/x.pdf","downloadable":true}`, `{"kind":"images","pages":[{"src":"reference/p1.png","alt":"…"}],"downloadSrc":"reference/x.pdf"}` або `{"kind":"pages","pages":["…"]}` |
 | `conversionTables[]` | `{"id","year","source","maxPrimary":32,"map":{"0":null,…,"32":200}}` — `null` = поріг не подолано |
 
 ### Питання

@@ -3,9 +3,9 @@ import type { NumericQuestion } from '../../content/types';
 import type { AnswerValue } from '../../engine/answers';
 import { numericErrorText, parseNumeric } from '../../engine/numeric';
 
-interface Props { q: NumericQuestion; value: AnswerValue | undefined; onChange: (v: AnswerValue) => void; onSubmit: () => void }
+interface Props { q: NumericQuestion; value: AnswerValue | undefined; onChange: (v: AnswerValue) => void; onSubmit: () => void; disabled?: boolean }
 
-export function Numeric({ q, value, onChange, onSubmit }: Props) {
+export function Numeric({ q, value, onChange, onSubmit, disabled }: Props) {
   const raw = value?.type === 'numeric' ? value.raw : '';
   const [touched, setTouched] = useState(false);
   const parsed = parseNumeric(raw, { allowFractions: q.numericRule.allowFractions });
@@ -24,12 +24,14 @@ export function Numeric({ q, value, onChange, onSubmit }: Props) {
         spellCheck={false}
         enterKeyHint="done"
         value={raw}
+        readOnly={disabled}
+        aria-readonly={disabled || undefined}
         maxLength={40}
         aria-invalid={!!error}
         aria-describedby={`${inputId}-hint${error ? ` ${inputId}-err` : ''}`}
         onChange={(e) => onChange({ type: 'numeric', raw: e.target.value })}
         onBlur={() => setTouched(true)}
-        onKeyDown={(e) => { if (e.key === 'Enter') { setTouched(true); onSubmit(); } }}
+        onKeyDown={(e) => { if (e.key === 'Enter' && !disabled) { setTouched(true); onSubmit(); } }}
       />
       <p id={`${inputId}-hint`} className="hint">
         Ціле або десяткове число; кома або крапка, мінус дозволено{q.numericRule.allowFractions ? '; у цьому завданні також дріб через «/»' : ''}.

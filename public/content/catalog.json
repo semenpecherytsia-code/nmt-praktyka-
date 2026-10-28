@@ -1,19 +1,13 @@
 {
   "schemaVersion": 1,
   "defaultSimulationId": "nmt-23",
-  "demoSimulationId": "demo-tech",
+  "demoSimulationId": null,
   "entries": [
     {
       "id": "nmt-23",
       "title": "Симуляція НМТ №23",
-      "package": null,
-      "videoMap": null
-    },
-    {
-      "id": "demo-tech",
-      "title": "Демонстраційний набір (технічна перевірка)",
-      "package": "sets/demo-tech/package.json",
-      "videoMap": "sets/demo-tech/video-map.json"
+      "package": "sets/nmt-23/package.json",
+      "videoMap": "sets/nmt-23/video-map.json"
     }
   ]
 }

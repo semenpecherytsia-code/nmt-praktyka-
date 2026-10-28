@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
-  "simulationId": "demo-tech",
+  "simulationId": "nmt-23",
   "bindings": [
     {
-      "questionId": "demo-q01",
+      "questionId": "nmt23-q01",
       "explanationVideoId": "demo-clip-a",
       "verifiedBy": "технічний тест, не пояснення"
     },
     {
-      "questionId": "demo-q02",
+      "questionId": "nmt23-q02",
       "explanationVideoId": "demo-clip-b",
       "verifiedBy": "технічний тест, не пояснення"
     }

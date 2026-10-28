@@ -24,7 +24,7 @@ describe('модель станів', () => {
     expect(overlayTransition('review', 'none', { type: 'OPEN_REFERENCE' })).toBe('none');
   });
   it('маршрути туди й назад', () => {
-    for (const r of [{ name: 'home' } as const, { name: 'home', simulationId: 'demo-tech' } as const, { name: 'attempt', attemptId: 'a1', position: 7 } as const, { name: 'review', attemptId: 'a1' } as const]) {
+    for (const r of [{ name: 'home' } as const, { name: 'home', simulationId: 'nmt-23' } as const, { name: 'attempt', attemptId: 'a1', position: 7 } as const, { name: 'review', attemptId: 'a1' } as const]) {
       expect(parseRoute(routeHash(r))).toEqual(r);
     }
   });

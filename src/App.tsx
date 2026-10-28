@@ -23,10 +23,10 @@ interface Data { catalog: Catalog; sets: LoadedSet[] }
 
 function Brand() {
   return (
-    <div className="brand">
+    <a className="brand" href="#/" aria-label={`${APP_CONFIG.appName} — на головну`}>
       <svg width="28" height="28" viewBox="0 0 32 32" aria-hidden><rect width="32" height="32" rx="9" fill="var(--accent)" /><path d="M9 22V10l7 8 7-8v12" stroke="#fff" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" /></svg>
       <span>{APP_CONFIG.appName}</span>
-    </div>
+    </a>
   );
 }
 

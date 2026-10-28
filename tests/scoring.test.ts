@@ -36,7 +36,7 @@ describe('оцінювання', () => {
   });
 
   it('відповідності: 0, 1, 2 або 3 бали; неповна відповідь не повна', () => {
-    const q = byId.get('demo-q16') as MatchingQuestion;
+    const q = byId.get('nmt23-q16') as MatchingQuestion;
     const [r1, r2, r3] = q.matchingRows.map((r) => r.id);
     const k = q.answerKey.pairs;
     const wrong = q.matchingOptions.find((o) => !Object.values(k).includes(o.id))!.id;
@@ -49,7 +49,7 @@ describe('оцінювання', () => {
   });
 
   it('числова відповідь: 2 або 0, нуль — повноцінна відповідь', () => {
-    const q = byId.get('demo-q19')!;
+    const q = byId.get('nmt23-q19')!;
     expect(scoreQuestion(q, 19, { type: 'numeric', raw: '\u22123' }).earned).toBe(2);
     expect(scoreQuestion(q, 19, { type: 'numeric', raw: '0' })).toMatchObject({ earned: 0, status: 'wrong' });
     expect(scoreQuestion(q, 19, { type: 'numeric', raw: '' })).toMatchObject({ earned: 0, status: 'skipped' });

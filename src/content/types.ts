@@ -95,7 +95,8 @@ export interface ScoringProfile {
 
 export type ReferenceMaterial =
   | { id: string; title: string; kind: 'pdf'; src: string; downloadable: boolean }
-  | { id: string; title: string; kind: 'pages'; pages: RichText[]; downloadSrc?: string | null };
+  | { id: string; title: string; kind: 'pages'; pages: RichText[]; downloadSrc?: string | null }
+  | { id: string; title: string; kind: 'images'; pages: { src: string; alt: string }[]; downloadSrc?: string | null };
 
 export interface ConversionTable {
   id: string;

@@ -71,9 +71,11 @@ function bump(a: Attempt, patch: Partial<Attempt>): Attempt {
   return { ...a, ...patch, revision: a.revision + 1 };
 }
 
-/** Чернетка зберігається, лише якщо відрізняється від збереженої відповіді. */
+/** Чернетка для питання без збереженої відповіді. */
 export function setDraft(a: Attempt, questionId: string, value: AnswerValue): Attempt {
   guard(a);
+  // Збережену відповідь змінити не можна до кінця симуляції.
+  if (a.committedAnswers[questionId]) return a;
   const drafts = { ...a.draftAnswers };
   if (answersEqual(value, a.committedAnswers[questionId])) delete drafts[questionId];
   else drafts[questionId] = value;
@@ -83,7 +85,7 @@ export function setDraft(a: Attempt, questionId: string, value: AnswerValue): At
 export function commitAnswer(a: Attempt, q: Question): Attempt {
   guard(a);
   const draft = a.draftAnswers[q.id];
-  if (!draft || !checkAnswer(q, draft).valid) return a;
+  if (a.committedAnswers[q.id] || !draft || !checkAnswer(q, draft).valid) return a;
   const drafts = { ...a.draftAnswers };
   delete drafts[q.id];
   return bump(a, { committedAnswers: { ...a.committedAnswers, [q.id]: draft }, draftAnswers: drafts });

@@ -281,7 +281,14 @@ export function validatePackage(pkg: unknown, videoMap: unknown | null, opts: Va
       if (!Array.isArray(r.pages) || r.pages.length === 0) c.error(rec, 'pages', 'потрібна хоча б одна сторінка');
       else r.pages.forEach((p: unknown, i: number) => checkRich(c, rec, `pages[${i}]`, p));
       if (r.downloadSrc) checkUrlField(c, rec, 'downloadSrc', r.downloadSrc, opts, 'set');
-    } else c.error(rec, 'kind', 'має бути "pdf" або "pages"');
+    } else if (r.kind === 'images') {
+      if (!Array.isArray(r.pages) || r.pages.length === 0) c.error(rec, 'pages', 'потрібна хоча б одна сторінка');
+      else r.pages.forEach((p: any, i: number) => {
+        checkUrlField(c, rec, `pages[${i}].src`, p?.src, opts, 'set');
+        if (typeof p?.alt !== 'string' || !p.alt.trim()) c.error(rec, `pages[${i}].alt`, 'потрібен текстовий опис сторінки');
+      });
+      if (r.downloadSrc) checkUrlField(c, rec, 'downloadSrc', r.downloadSrc, opts, 'set');
+    } else c.error(rec, 'kind', 'має бути "pdf", "pages" або "images"');
   });
   if (sim.referenceMaterialId !== null && sim.referenceMaterialId !== undefined && !refs.some((r) => r?.id === sim.referenceMaterialId)) {
     c.error(srec, 'referenceMaterialId', `довідник «${sim.referenceMaterialId}» не знайдено`);

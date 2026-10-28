@@ -26,7 +26,7 @@ export function ReferenceModal({ open, onClose, material, baseDir }: Props) {
       </Dialog>
     );
   }
-  const total = material.kind === 'pages' ? material.pages.length : count;
+  const total = material.kind === 'pdf' ? count : material.pages.length;
   const download = material.kind === 'pdf'
     ? (material.downloadable ? resolveContentUrl(material.src, baseDir) : null)
     : material.downloadSrc ? resolveContentUrl(material.downloadSrc, baseDir) : null;
@@ -68,6 +68,13 @@ export function ReferenceModal({ open, onClose, material, baseDir }: Props) {
             <RichText text={material.pages[page - 1]} />
           </div>
         )}
+        {material.kind === 'images' && (() => {
+          const pg = material.pages[page - 1];
+          const src = pg ? resolveContentUrl(pg.src, baseDir) : null;
+          return src
+            ? <img className="ref-image" src={src} alt={pg.alt} style={{ width: `min(${Math.round(zoom * 100)}%, ${Math.round(zoom * 820)}px)` }} />
+            : <p className="empty-state">Сторінку не вдалося завантажити.</p>;
+        })()}
         {material.kind === 'pdf' && (() => {
           const src = resolveContentUrl(material.src, baseDir);
           if (!src) return <p className="empty-state">Довідкові матеріали недоступні: некоректна адреса файла.</p>;
