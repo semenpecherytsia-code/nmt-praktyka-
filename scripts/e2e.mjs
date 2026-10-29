@@ -1,4 +1,4 @@
-// Наскрізна перевірка в Chromium (Playwright): npm run build && npm run e2e
+// Наскрізна перевірка в Chromium (Playwright) з вимкненою хмарою: VITE_SUPABASE_URL= npm run build && npm run e2e
 // Запускає `vite preview`, проходить сценарій і зберігає знімки екрана в ./e2e-shots.
 import { createRequire } from 'node:module';
 import { spawn } from 'node:child_process';
