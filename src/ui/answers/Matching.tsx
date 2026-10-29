@@ -108,6 +108,7 @@ export function Matching({ q, value, onChange, disabled }: Props) {
   const ghost = drag?.moved ? optionOf(drag.optId) : null;
 
   return (
+    <div className="dnd-wrap">
     <div ref={rootRef} className={`dnd${disabled ? ' is-locked' : ''}`}>
       <div className="dnd__rows">
         {q.matchingRows.map((r, ri) => {
@@ -165,6 +166,7 @@ export function Matching({ q, value, onChange, disabled }: Props) {
           <RichText text={ghost.content} className="mchip__text" />
         </div>
       )}
+    </div>
     </div>
   );
 }

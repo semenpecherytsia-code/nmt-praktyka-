@@ -213,11 +213,16 @@ img { max-width: 100%; height: auto; }
 .start-card__lock { flex-basis: 100%; }
 
 /* відповідності: перетягування */
-.dnd { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 16px 20px; align-items: start; }
+.dnd-wrap { container: dnd / inline-size; }
+.dnd { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 12px 10px; align-items: start; }
 .dnd__rows { display: grid; gap: 10px; min-width: 0; }
-.dnd__row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; align-items: center; }
+.dnd__row { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; align-items: center; }
+@container dnd (min-width: 700px) {
+  .dnd { grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: 16px 20px; }
+  .dnd__row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
+}
 .dnd__item { display: flex; align-items: center; gap: 10px; min-height: 60px; padding: 10px 14px; border-radius: 14px; background: var(--accent-soft); border: 1.5px solid #C9C2FB; font-size: 18px; min-width: 0; }
-.dnd__item > .rich, .mchip__text { min-width: 0; overflow-x: auto; overflow-y: hidden; padding: 2px 3px; scrollbar-width: none; }
+.dnd__item > .rich, .mchip__text { min-width: 0; padding: 2px 3px; overflow-wrap: break-word; hyphens: auto; -webkit-hyphens: auto; }
 .dnd__num { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 8px; background: var(--accent); color: #fff; font-weight: 700; flex: none; }
 .dnd__arrow { color: var(--text-2); flex: none; }
 .dnd__slot { min-height: 60px; border-radius: 14px; border: 2px dashed var(--control-border); display: flex; align-items: stretch; transition: border-color var(--dur), background var(--dur); min-width: 0; }
@@ -439,9 +444,7 @@ a.brand:hover span { color: var(--accent-text); }
 }
 
 @media (max-width: 640px) {
-  .dnd { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 12px 8px; }
   .dnd__rows { gap: 12px; }
-  .dnd__row { grid-template-columns: minmax(0, 1fr); gap: 4px; }
   .dnd__item { min-height: 52px; padding: 8px 10px; gap: 8px; font-size: 16px; }
   .dnd__num { width: 26px; height: 26px; }
   .dnd__slot { min-height: 52px; }
@@ -529,16 +532,12 @@ a.brand:hover span { color: var(--accent-text); }
 
 /* Перетягування пальцем: внутрішні елементи варіанта (формули) не повинні перехоплювати жест як прокрутку. */
 .mchip, .mchip * { touch-action: none; }
-.mchip .mchip__text { overflow: hidden; }
 .dnd__options { grid-template-columns: minmax(0, 1fr); }
 .dnd__options li { min-width: 0; }
 @media (max-width: 640px) {
-  .dnd { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); }
   .dnd__item { font-size: 15px; }
-  .dnd__item > .rich { hyphens: auto; -webkit-hyphens: auto; overflow-wrap: anywhere; }
 }
 @media (max-width: 640px) {
-  .dnd { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); }
   .dnd__bank .mchip { padding: 6px 4px; gap: 4px; }
   .dnd__bank .mchip .katex { font-size: 1em; }
   .dnd__bank .mchip__letter { width: 24px; height: 24px; }
@@ -551,3 +550,16 @@ a.brand:hover span { color: var(--accent-text); }
 }
 /* Під час перетягування сторінка не «пружинить» і не прокручується пальцем. */
 html.is-dragging-chip, html.is-dragging-chip body { overscroll-behavior: none; touch-action: none; }
+@media (max-width: 400px) {
+  .mchip--placed .katex { font-size: 0.92em; }
+}
+/* Дуже вузькі телефони (320 px) */
+@media (max-width: 350px) {
+  .exam-bar { gap: 4px; }
+  .exam-bar__mobile { gap: 4px; }
+  .exam-bar .btn--sm, .exam-bar__mobile .btn { padding: 6px 6px; gap: 4px; font-size: 13px; }
+  .exam-bar__mobile .timer, .exam-bar__mobile [class*="timer"] { font-size: 15px; padding: 6px 6px; gap: 4px; }
+}
+@container dnd (max-width: 290px) {
+  .dnd { grid-template-columns: minmax(0, 1fr); }
+}
