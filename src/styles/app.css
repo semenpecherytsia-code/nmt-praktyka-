@@ -563,3 +563,42 @@ html.is-dragging-chip, html.is-dragging-chip body { overscroll-behavior: none; t
 @container dnd (max-width: 290px) {
   .dnd { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* ---------- Обліковий запис і сторінка адміністратора ---------- */
+.account { margin-left: auto; display: flex; align-items: center; gap: 8px; min-width: 0; }
+.account__user { display: inline-flex; align-items: center; gap: 8px; min-width: 0; font-size: 14px; color: var(--text-2); }
+.account__avatar { width: 28px; height: 28px; border-radius: 50%; flex: none; }
+.account__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px; }
+@media (max-width: 640px) { .account__name { display: none; } }
+
+.admin { max-width: 1100px; margin: 8px auto 32px; display: grid; gap: 20px; min-width: 0; }
+.admin__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.admin__title { font-size: clamp(24px, 3vw, 32px); font-weight: 750; }
+.admin__h2 { font-size: 18px; font-weight: 700; margin-bottom: 12px; }
+.admin-card { padding: 20px; min-width: 0; display: grid; gap: 12px; }
+.admin__filters { display: flex; gap: 12px; flex-wrap: wrap; }
+.admin__field { display: grid; gap: 4px; font-size: 13px; color: var(--text-2); min-width: 0; }
+.admin__field--grow { flex: 1; min-width: 200px; }
+.admin__field select, .admin__search { min-height: 44px; border: 1px solid var(--control-border); border-radius: var(--r-field); background: var(--surface); font: inherit; font-size: 15px; color: var(--text); padding: 0 12px; }
+.admin__search { display: flex; align-items: center; gap: 8px; }
+.admin__search input { border: 0; outline: 0; font: inherit; flex: 1; min-width: 0; background: transparent; min-height: 42px; }
+.admin__stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 0; }
+.admin__stats > div { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 14px 16px; }
+.admin__stats dt { font-size: 13px; color: var(--text-2); }
+.admin__stats dd { margin: 4px 0 0; font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; }
+@media (max-width: 640px) { .admin__stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.admin__table-wrap { overflow-x: auto; min-width: 0; }
+.admin__table { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
+.admin__table th { text-align: left; font-size: 12px; color: var(--text-2); font-weight: 600; padding: 8px 10px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+.admin__table td { padding: 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.admin__table td small { display: block; color: var(--text-2); font-size: 12px; }
+.admin__row { cursor: pointer; }
+.admin__row:hover td { background: var(--bg); }
+.admin__expand { display: flex; align-items: flex-start; gap: 6px; border: 0; background: none; padding: 0; text-align: left; font: inherit; color: inherit; cursor: pointer; min-height: 0; }
+.admin__expand small { display: block; color: var(--text-2); font-size: 12px; }
+.admin__sub > td { background: var(--bg); padding: 8px 10px 14px; }
+.admin__table td { white-space: nowrap; }
+@media (max-width: 640px) {
+  .admin-card { padding: 14px 12px; }
+  .admin__table td, .admin__table th { padding: 8px 8px; }
+}

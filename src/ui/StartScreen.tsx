@@ -13,6 +13,8 @@ interface Props {
   demoId: string | null;
   now: number;
   onStart: () => void;
+  /** Підключено базу результатів, а учень ще не ввійшов: кнопка старту веде на вхід через Google. */
+  needsLogin?: boolean;
   onContinue: () => void;
   onRestart: () => void;
   onFinish: () => void;
@@ -94,7 +96,7 @@ export function StartScreen(p: Props) {
             </>
           ) : (
             <button type="button" className="btn btn--primary btn--lg" onClick={p.onStart}>
-              <Play size={18} aria-hidden /> Розпочати симуляцію
+              <Play size={18} aria-hidden /> {p.needsLogin ? 'Увійти через Google і почати' : 'Розпочати симуляцію'}
             </button>
           )}
           <button type="button" className="btn btn--ghost" onClick={p.onOpenReference}>
@@ -106,6 +108,7 @@ export function StartScreen(p: Props) {
             <button type="button" className="btn btn--ghost" onClick={p.onOpenSelector}><Layers size={18} aria-hidden /> Обрати симуляцію</button>
           )}
         </div>
+        {p.needsLogin && <p className="hint">Вхід потрібен, щоб викладач бачив ваші результати.</p>}
 
         <h2 className="start-card__h2">Як це працює</h2>
         <ul className="instructions">

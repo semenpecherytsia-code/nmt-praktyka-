@@ -13,6 +13,9 @@ import { ReferenceModal } from './ui/ReferenceModal';
 import { SelectorModal } from './ui/SelectorModal';
 import { useAttempt } from './ui/useAttempt';
 import { AlertTriangle } from 'lucide-react';
+import { cloudEnabled, markOwner, signIn, syncResults, useAuth } from './cloud/cloud';
+import { Account } from './ui/Account';
+import { AdminScreen } from './ui/AdminScreen';
 
 const kv = browserKV();
 const repo = new AttemptRepo(kv);
@@ -20,6 +23,10 @@ const tabId = (() => { try { return crypto.randomUUID(); } catch { return Math.r
 const lease = new TabLease(kv, tabId);
 
 interface Data { catalog: Catalog; sets: LoadedSet[] }
+
+function Top({ exam = false }: { exam?: boolean }) {
+  return <div className={`topstrip${exam ? ' topstrip--exam' : ''}`}><Brand /><Account compact={exam} /></div>;
+}
 
 function Brand() {
   return (
@@ -59,6 +66,14 @@ export function App() {
 
   useEffect(() => { document.title = APP_CONFIG.appName; }, []);
 
+  // Завершені спроби учня надсилаються в базу після входу й після кожного завершення.
+  const auth = useAuth();
+  useEffect(() => {
+    if (!data || !auth.user) return;
+    const titleOf = (id: string) => data.sets.find((x) => x.entry.id === id)?.entry.title ?? null;
+    void syncResults(repo, kv, titleOf);
+  }, [data, auth.user?.id, route]); // eslint-disable-line react-hooks/exhaustive-deps
+
   if (loadError) return <Fatal text={`Не вдалося завантажити каталог наборів (${loadError}).`} />;
   if (!data) return <div className="app"><div className="topstrip"><Brand /></div><p className="loading" role="status">Завантаження…</p></div>;
   return <Routed data={data} route={route} />;
@@ -76,6 +91,9 @@ function Fatal({ text }: { text: string }) {
 
 function Routed({ data, route }: { data: Data; route: Route }) {
   if (route.name === 'home') return <Home data={data} simulationId={route.simulationId} />;
+  if (route.name === 'admin') return (
+    <div className="app"><Top /><AdminScreen titleOf={(id) => data.sets.find((x) => x.entry.id === id)?.entry.title ?? null} /></div>
+  );
   return <AttemptView key={route.attemptId} data={data} route={route} />;
 }
 
@@ -116,13 +134,17 @@ function Home({ data, simulationId }: { data: Data; simulationId?: string }) {
     navigate({ name: 'home', simulationId: id });
   };
 
+  const auth = useAuth();
   const start = () => {
     if (!set.pkg) return;
     const existing = repo.activeFor(simId);
     if (existing && !isExpired(existing, Date.now())) return navigate({ name: 'attempt', attemptId: existing.id, position: 1 });
+    // Коли підключено базу, тест починається лише після входу — інакше викладач не побачить результат.
+    if (cloudEnabled && !auth.user) { void signIn(); return; }
     repo.saveSnapshot(set.pkg);
     const a = createAttempt(set.pkg, Date.now());
     repo.save(a);
+    markOwner(kv, a.id);
     repo.setPrefs({ selectedSimulationId: simId });
     lease.acquire(a.id, true);
     navigate({ name: 'attempt', attemptId: a.id, position: 1 });
@@ -151,8 +173,8 @@ function Home({ data, simulationId }: { data: Data; simulationId?: string }) {
 
   return (
     <div className="app">
-      <div className="topstrip"><Brand /></div>
-      <StartScreen set={set} active={activeValid} finished={finished} availableCount={available.length} demoId={demoId} now={now}
+      <Top />
+      <StartScreen set={set} needsLogin={cloudEnabled && auth.ready && !auth.user} active={activeValid} finished={finished} availableCount={available.length} demoId={demoId} now={now}
         onStart={start} onRestart={restart} onFinish={finishActive}
         onContinue={() => activeValid && navigate({ name: 'attempt', attemptId: activeValid.id, position: 0 })}
         onOpenSelector={() => send({ type: 'OPEN_SELECTOR' })}
@@ -172,6 +194,7 @@ function AttemptView({ data, route }: { data: Data; route: Extract<Route, { name
   const set = data.sets.find((s) => s.entry.id === attempt?.simulationId);
   const { screen, redirect } = resolveScreen(route, attempt);
   const [overlay, send] = useOverlay(screen === 'review' ? 'review' : 'active');
+  const auth = useAuth();
 
   useEffect(() => { if (redirect) navigate(redirect, true); }, [redirect?.name, route.attemptId]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -192,15 +215,17 @@ function AttemptView({ data, route }: { data: Data; route: Extract<Route, { name
     const retry = set?.pkg ? () => {
       const existing = repo.activeFor(attempt.simulationId);
       if (existing && !isExpired(existing, Date.now())) return navigate({ name: 'attempt', attemptId: existing.id, position: 0 });
+      if (cloudEnabled && !auth.user) { void signIn(); return; }
       repo.saveSnapshot(set.pkg!);
       const a = createAttempt(set.pkg!, Date.now());
       repo.save(a);
+      markOwner(kv, a.id);
       lease.acquire(a.id, true);
       navigate({ name: 'attempt', attemptId: a.id, position: 1 });
     } : null;
     return (
       <div className="app">
-        <div className="topstrip"><Brand /></div>
+        <Top />
         <ReviewScreen attempt={attempt} pkg={pkg} baseDir={baseDir} videoMap={set?.videoMap ?? null}
           onRetry={retry} onHome={() => navigate({ name: 'home', simulationId: attempt.simulationId })}
           history={repo.finishedFor(attempt.simulationId)} onOpenAttempt={(id) => navigate({ name: 'review', attemptId: id })} />
@@ -212,7 +237,7 @@ function AttemptView({ data, route }: { data: Data; route: Extract<Route, { name
 
   return (
     <div className="app app--exam">
-      <div className="topstrip topstrip--exam"><Brand /></div>
+      <Top exam />
       {leaseState === 'other' && (
         <div className="takeover" role="alertdialog" aria-labelledby="takeover-title" aria-describedby="takeover-text">
           <div className="card takeover__card">
