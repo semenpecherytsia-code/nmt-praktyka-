@@ -602,3 +602,29 @@ html.is-dragging-chip, html.is-dragging-chip body { overscroll-behavior: none; t
   .admin-card { padding: 14px 12px; }
   .admin__table td, .admin__table th { padding: 8px 8px; }
 }
+
+/* ---------- Редагування завдань (адміністратор) ---------- */
+.question__head-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.admin__head-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.admin { grid-template-columns: minmax(0, 1fr); }
+.edit-grid { grid-template-columns: repeat(auto-fill, minmax(42px, 1fr)); }
+.edit-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.edit-preview { padding: 20px; position: sticky; top: 16px; display: grid; gap: 12px; min-width: 0; }
+@media (max-width: 900px) { .edit-layout { grid-template-columns: minmax(0, 1fr); } .edit-preview { position: static; } }
+.edit-field { display: grid; gap: 6px; font-size: 13px; color: var(--text-2); min-width: 0; }
+.edit-field textarea, .edit-field input, .edit-field select, .edit-pairs select {
+  width: 100%; min-height: 44px; border: 1px solid var(--control-border); border-radius: var(--r-field); background: var(--surface);
+  font: inherit; font-size: 15px; color: var(--text); padding: 10px 12px; box-sizing: border-box;
+}
+.edit-field textarea { resize: vertical; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 14px; line-height: 1.5; }
+.edit-row2 { display: grid; grid-template-columns: 2fr 1fr; gap: 12px; }
+@media (max-width: 560px) { .edit-row2 { grid-template-columns: 1fr; } }
+.edit-pairs { display: flex; gap: 12px; flex-wrap: wrap; }
+.edit-pairs label { display: flex; align-items: center; gap: 8px; font-size: 15px; color: var(--text); }
+.edit-pairs select { width: auto; min-width: 72px; }
+.edit-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.edit-status { font-size: 14px; }
+.edit-status.is-ok { color: var(--correct, #127a3b); }
+.edit-status.is-err { color: #b42318; }
+.edit-expl { border-top: 1px solid var(--border); padding-top: 12px; display: grid; gap: 6px; }
+.admin .notice code { font-size: 13px; background: rgba(0,0,0,.06); padding: 1px 4px; border-radius: 4px; }

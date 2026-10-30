@@ -52,3 +52,5 @@ create policy "results: admin delete" on public.results
   for delete to authenticated using (public.is_admin());
 
 insert into public.admins (email) values (lower('ADMIN@EMAIL.COM')) on conflict do nothing;
+
+-- Правки завдань адміністратором — див. content-edits.sql.

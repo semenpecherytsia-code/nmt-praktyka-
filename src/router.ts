@@ -4,12 +4,17 @@ import { useEffect, useState } from 'react';
 export type Route =
   | { name: 'home'; simulationId?: string }
   | { name: 'admin' }
+  | { name: 'edit'; simulationId?: string; position: number }
   | { name: 'attempt'; attemptId: string; position: number }
   | { name: 'review'; attemptId: string };
 
 export function parseRoute(hash: string): Route {
   const parts = hash.replace(/^#\/?/, '').split('/').filter(Boolean).map(decodeURIComponent);
   if (parts[0] === 'admin') return { name: 'admin' };
+  if (parts[0] === 'edit') {
+    const n = Number(parts[2]);
+    return { name: 'edit', simulationId: parts[1], position: Number.isInteger(n) && n > 0 ? n : 1 };
+  }
   if (parts[0] === 'sim' && parts[1]) return { name: 'home', simulationId: parts[1] };
   if (parts[0] === 'attempt' && parts[1]) {
     if (parts[2] === 'review') return { name: 'review', attemptId: parts[1] };
@@ -22,6 +27,7 @@ export function parseRoute(hash: string): Route {
 export function routeHash(r: Route): string {
   switch (r.name) {
     case 'admin': return '#/admin';
+    case 'edit': return r.simulationId ? `#/edit/${encodeURIComponent(r.simulationId)}/${r.position}` : '#/edit';
     case 'home': return r.simulationId ? `#/sim/${encodeURIComponent(r.simulationId)}` : '#/';
     case 'attempt': return `#/attempt/${encodeURIComponent(r.attemptId)}/q/${r.position}`;
     case 'review': return `#/attempt/${encodeURIComponent(r.attemptId)}/review`;

@@ -13,6 +13,7 @@ import { Figure } from './Figure';
 import { formatClock, TYPE_LABEL } from './format';
 import { APP_CONFIG } from '../config';
 import { navigate } from '../router';
+import { useAuth } from '../cloud/cloud';
 
 interface Props {
   attempt: Attempt;
@@ -168,6 +169,7 @@ export function ExamScreen(props: Props) {
     : progress === 'draft_only' ? 'Відповідь ще не збережено'
     : '';
   const headingId = `q-title-${q.id}`;
+  const isAdmin = useAuth().isAdmin;
   const summary = summarize(attempt, ordered);
 
   return (
@@ -197,11 +199,16 @@ export function ExamScreen(props: Props) {
                 <h1 id={headingId} ref={headingRef} tabIndex={-1} className="question__title">Завдання {position} <span className="question__of">з {total}</span></h1>
                 <p className="question__type">{TYPE_LABEL[q.type]} · {q.maxPoints} {q.maxPoints === 1 ? 'бал' : q.maxPoints < 5 ? 'бали' : 'балів'}</p>
               </div>
-              <button type="button" className={`btn btn--flag btn--sm${flagged ? ' is-on' : ''}`} aria-pressed={flagged}
-                onClick={() => update((a) => toggleFlag(a, q.id))}>
-                <Flag size={16} aria-hidden fill={flagged ? 'currentColor' : 'none'} />
-                <span>{flagged ? 'Позначено для перегляду' : 'Позначити для перегляду'}</span>
-              </button>
+              <div className="question__head-actions">
+                {isAdmin && (
+                  <a className="btn btn--ghost btn--sm" href={`#/edit/${encodeURIComponent(pkg.simulation.id)}/${position}`}><PenLine size={16} aria-hidden /> Редагувати</a>
+                )}
+                <button type="button" className={`btn btn--flag btn--sm${flagged ? ' is-on' : ''}`} aria-pressed={flagged}
+                  onClick={() => update((a) => toggleFlag(a, q.id))}>
+                  <Flag size={16} aria-hidden fill={flagged ? 'currentColor' : 'none'} />
+                  <span>{flagged ? 'Позначено для перегляду' : 'Позначити для перегляду'}</span>
+                </button>
+              </div>
             </div>
 
             <RichText text={q.statement} className="question__statement" />

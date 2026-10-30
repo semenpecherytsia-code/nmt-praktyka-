@@ -16,6 +16,7 @@ import { AlertTriangle } from 'lucide-react';
 import { cloudEnabled, markOwner, signIn, syncResults, useAuth } from './cloud/cloud';
 import { Account } from './ui/Account';
 import { AdminScreen } from './ui/AdminScreen';
+import { EditScreen } from './ui/EditScreen';
 
 const kv = browserKV();
 const repo = new AttemptRepo(kv);
@@ -76,7 +77,8 @@ export function App() {
 
   if (loadError) return <Fatal text={`Не вдалося завантажити каталог наборів (${loadError}).`} />;
   if (!data) return <div className="app"><div className="topstrip"><Brand /></div><p className="loading" role="status">Завантаження…</p></div>;
-  return <Routed data={data} route={route} />;
+  const reload = async () => { const d = await loadAll(); setData(d); };
+  return <Routed data={data} route={route} reload={reload} />;
 }
 
 function Fatal({ text }: { text: string }) {
@@ -89,8 +91,11 @@ function Fatal({ text }: { text: string }) {
   );
 }
 
-function Routed({ data, route }: { data: Data; route: Route }) {
+function Routed({ data, route, reload }: { data: Data; route: Route; reload: () => Promise<void> }) {
   if (route.name === 'home') return <Home data={data} simulationId={route.simulationId} />;
+  if (route.name === 'edit') return (
+    <div className="app"><Top /><EditScreen sets={data.sets} simulationId={route.simulationId} position={route.position} reload={reload} /></div>
+  );
   if (route.name === 'admin') return (
     <div className="app"><Top /><AdminScreen titleOf={(id) => data.sets.find((x) => x.entry.id === id)?.entry.title ?? null} /></div>
   );

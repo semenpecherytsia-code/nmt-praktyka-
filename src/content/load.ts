@@ -1,11 +1,14 @@
 import { APP_CONFIG } from '../config';
 import type { Catalog, CatalogEntry, ContentPackage, VideoMap } from './types';
 import { validatePackage, type ValidationResult } from './validate';
+import { applyEdits, fetchEdits, type EditRow } from '../cloud/edits';
 
 export interface LoadedSet {
   entry: CatalogEntry;
   status: 'available' | 'not_added' | 'invalid' | 'load_error';
   pkg: ContentPackage | null;
+  /** Пакет без правок адміністратора (для редактора). */
+  original?: ContentPackage | null;
   videoMap: VideoMap | null;
   validation: ValidationResult | null;
   /** Папка набору для відносних адрес рисунків, PDF і відео. */
@@ -47,8 +50,24 @@ export async function loadSet(entry: CatalogEntry): Promise<LoadedSet> {
   }
 }
 
+/** Правки адміністратора накладаються лише якщо пакет після них теж проходить перевірку. */
+function withEdits(set: LoadedSet, edits: EditRow[]): LoadedSet {
+  if (set.status !== 'available' || !set.pkg) return set;
+  const edited = applyEdits(set.pkg, edits);
+  if (edited === set.pkg) return { ...set, original: set.pkg };
+  const v = validatePackage(edited, set.videoMap);
+  if (!v.ok) {
+    console.warn(`Правки до «${set.entry.id}» не пройшли перевірку — показано початкові завдання`, v.issues.filter((i) => i.level === 'error'));
+    return { ...set, original: set.pkg };
+  }
+  const entry = edited.simulation.title !== set.pkg.simulation.title ? { ...set.entry, title: edited.simulation.title } : set.entry;
+  return { ...set, entry, pkg: edited, original: set.pkg, validation: v };
+}
+
 export async function loadAll(): Promise<{ catalog: Catalog; sets: LoadedSet[] }> {
+  const editsP = fetchEdits();
   const catalog = await loadCatalog();
   const sets = await Promise.all(catalog.entries.map(loadSet));
-  return { catalog, sets };
+  const edits = await editsP;
+  return { catalog, sets: sets.map((s) => withEdits(s, edits)) };
 }
