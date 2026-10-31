@@ -54,3 +54,4 @@ create policy "results: admin delete" on public.results
 insert into public.admins (email) values (lower('ADMIN@EMAIL.COM')) on conflict do nothing;
 
 -- Правки завдань адміністратором — див. content-edits.sql.
+-- Власні симуляції та файли — див. simulations.sql.

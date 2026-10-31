@@ -1,7 +1,7 @@
 import { APP_CONFIG } from '../config';
 import type { Catalog, CatalogEntry, ContentPackage, VideoMap } from './types';
 import { validatePackage, type ValidationResult } from './validate';
-import { applyEdits, fetchEdits, type EditRow } from '../cloud/edits';
+import { applyEdits, fetchEdits, fetchSimulations, isHidden, type EditRow, type SimulationRow } from '../cloud/edits';
 
 export interface LoadedSet {
   entry: CatalogEntry;
@@ -9,6 +9,10 @@ export interface LoadedSet {
   pkg: ContentPackage | null;
   /** Пакет без правок адміністратора (для редактора). */
   original?: ContentPackage | null;
+  /** Симуляцію створено адміністратором на сайті (зберігається в базі). */
+  custom?: { published: boolean };
+  /** Учні її не бачать: чернетка або схована. */
+  hidden?: boolean;
   videoMap: VideoMap | null;
   validation: ValidationResult | null;
   /** Папка набору для відносних адрес рисунків, PDF і відео. */
@@ -52,7 +56,8 @@ export async function loadSet(entry: CatalogEntry): Promise<LoadedSet> {
 
 /** Правки адміністратора накладаються лише якщо пакет після них теж проходить перевірку. */
 function withEdits(set: LoadedSet, edits: EditRow[]): LoadedSet {
-  if (set.status !== 'available' || !set.pkg) return set;
+  if (!set.pkg) return set;
+  if (set.status !== 'available') return { ...set, original: set.pkg };
   const edited = applyEdits(set.pkg, edits);
   if (edited === set.pkg) return { ...set, original: set.pkg };
   const v = validatePackage(edited, set.videoMap);
@@ -64,10 +69,32 @@ function withEdits(set: LoadedSet, edits: EditRow[]): LoadedSet {
   return { ...set, entry, pkg: edited, original: set.pkg, validation: v };
 }
 
-export async function loadAll(): Promise<{ catalog: Catalog; sets: LoadedSet[] }> {
+/** Симуляція з бази: рисунки й довідник із відносними адресами беруться з папки набору-шаблону. */
+function customSet(row: SimulationRow, baseDir: string): LoadedSet {
+  const pkg = row.package;
+  const entry: CatalogEntry = { id: row.id, title: pkg.simulation.title, package: null, videoMap: null };
+  const validation = validatePackage(pkg, null);
+  return { entry, status: validation.ok ? 'available' : 'invalid', pkg, videoMap: null, validation, baseDir, custom: { published: row.published } };
+}
+
+export interface LoadedData {
+  catalog: Catalog;
+  /** Те, що бачать учні. */
+  sets: LoadedSet[];
+  /** Усе, включно з чернетками й схованими (для адміністратора та старих спроб). */
+  all: LoadedSet[];
+  edits: EditRow[];
+}
+
+export async function loadAll(): Promise<LoadedData> {
   const editsP = fetchEdits();
+  const simsP = fetchSimulations();
   const catalog = await loadCatalog();
-  const sets = await Promise.all(catalog.entries.map(loadSet));
-  const edits = await editsP;
-  return { catalog, sets: sets.map((s) => withEdits(s, edits)) };
+  const builtIn = await Promise.all(catalog.entries.map(loadSet));
+  const [edits, rows] = await Promise.all([editsP, simsP]);
+  const templateDir = builtIn.find((s) => s.entry.id === catalog.defaultSimulationId)?.baseDir ?? builtIn[0]?.baseDir ?? '';
+  const all = [...builtIn, ...rows.filter((r) => !builtIn.some((b) => b.entry.id === r.id)).map((r) => customSet(r, templateDir))]
+    .map((s) => withEdits(s, edits))
+    .map((s) => ({ ...s, hidden: (s.custom ? !s.custom.published : false) || isHidden(s.entry.id, edits) }));
+  return { catalog, sets: all.filter((s) => !s.hidden), all, edits };
 }

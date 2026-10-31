@@ -628,3 +628,24 @@ html.is-dragging-chip, html.is-dragging-chip body { overscroll-behavior: none; t
 .edit-status.is-err { color: #b42318; }
 .edit-expl { border-top: 1px solid var(--border); padding-top: 12px; display: grid; gap: 6px; }
 .admin .notice code { font-size: 13px; background: rgba(0,0,0,.06); padding: 1px 4px; border-radius: 4px; }
+.edit-simbar { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
+.edit-simbar .admin__field select { width: 100%; }
+.edit-new { flex-basis: 100%; }
+.edit-badge { font-size: 14px; font-weight: 600; padding: 6px 10px; border-radius: 999px; justify-self: start; }
+.edit-badge.is-on { background: var(--correct-bg, #e8f7ee); color: var(--correct, #127a3b); }
+.edit-badge.is-off { background: var(--partial-bg); color: #7A3A06; }
+.edit-actions--split { border-top: 1px solid var(--border); padding-top: 12px; }
+.edit-danger { color: var(--bad); }
+.btn.is-disabled { opacity: .5; pointer-events: none; }
+label.btn { cursor: pointer; }
+.edit-pages { list-style: none; margin: 0; padding: 0; display: flex; gap: 12px; flex-wrap: wrap; }
+.edit-pages li { display: grid; gap: 4px; font-size: 13px; color: var(--text-2); width: 120px; }
+.edit-pages img { width: 120px; height: 160px; object-fit: cover; object-position: top; border: 1px solid var(--border); border-radius: 8px; background: #fff; }
+.edit-file { display: flex; gap: 8px; align-items: center; font-size: 15px; color: var(--text); }
+.edit-images { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.edit-images li { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 12px; align-items: start; padding: 10px; border: 1px solid var(--border); border-radius: 12px; }
+.edit-images img { width: 96px; height: 72px; object-fit: contain; background: #fff; border-radius: 6px; }
+.edit-images__fields { display: grid; gap: 6px; min-width: 0; }
+.edit-images__fields input { width: 100%; min-height: 40px; border: 1px solid var(--control-border); border-radius: var(--r-field); padding: 6px 10px; font: inherit; font-size: 14px; box-sizing: border-box; background: var(--surface); color: var(--text); }
+.edit-add { justify-self: start; }
+@media (max-width: 420px) { .edit-images li { grid-template-columns: 1fr; } }
