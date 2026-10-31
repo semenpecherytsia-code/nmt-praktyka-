@@ -652,3 +652,11 @@ label.btn { cursor: pointer; }
 .edit-video { display: grid; grid-template-columns: minmax(0, 1fr) 140px; gap: 10px; }
 @media (max-width: 420px) { .edit-video { grid-template-columns: 1fr; } }
 .edit-preview .video__frame iframe { width: 100%; aspect-ratio: 16 / 9; border: 0; border-radius: 12px; }
+.edit-grid .qcell--draft_only, .edit-legend .lg--draft { border: 2px dashed #D97706; background: #FFF7E6; }
+.edit-legend { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 13px; margin-top: -8px; }
+.edit-savebar { position: sticky; bottom: 0; z-index: 20; padding-bottom: env(safe-area-inset-bottom, 0px); }
+.edit-savebar__inner { display: flex; align-items: center; justify-content: space-between; gap: 10px 16px; flex-wrap: wrap;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: 0 -4px 24px rgba(20, 16, 60, .12); padding: 12px 16px; margin-bottom: 12px; }
+.edit-savebar__text { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 0; }
+.edit-savebar__num { min-width: 32px; height: 32px; border-radius: 8px; border: 2px dashed #D97706; background: #FFF7E6; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; color: var(--text); }
+.edit-savebar .edit-status { margin: 0; flex-basis: 100%; }

@@ -44,9 +44,38 @@ function formOf(q: Question): QuestionEdit {
 const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
 const issuesOf = (p: ContentPackage) => validatePackage(p, null).issues.filter((i) => i.level === 'error').map((i) => `${i.field}: ${i.message}`);
 
+/** Незбережені правки завдань: simulationId → questionId → форма. Живуть, поки відкрита сторінка редактора. */
+type Drafts = Record<string, Record<string, QuestionEdit>>;
+
+const cleanText = (f: QuestionEdit): QuestionEdit => ({ ...f, textExplanation: f.textExplanation?.trim() ? f.textExplanation : null });
+const previewOf = (orig: Question, f: QuestionEdit) => applyQuestionEdit(orig, cleanText(f));
+
+/** Нові помилки перевірки, які з’явилися б після цієї правки (зламана формула, ключ тощо). */
+function errorsOf(original: ContentPackage, baseline: Set<string>, orig: Question, f: QuestionEdit): string[] {
+  const preview = previewOf(orig, f);
+  const cand: ContentPackage = { ...original, questions: original.questions.map((x) => (x.id === orig.id ? preview : x)) };
+  return issuesOf(cand).filter((m) => !baseline.has(m));
+}
+
+/** Записує правку в базу; якщо текст збігся з початковим — просто прибирає правку. */
+function persist(simId: string, orig: Question, f: QuestionEdit): Promise<void> {
+  const data = cleanText(f);
+  if (!f.assets?.length && !orig.assets?.length) delete data.assets;
+  return same(formOf(previewOf(orig, f)), formOf(orig)) ? deleteEdit(simId, orig.id) : saveEdit(simId, orig.id, data);
+}
+
 /** Сторінка адміністратора: зміна тексту завдань, варіантів, ключів і пояснень. Учні бачать правки після збереження. */
 export function EditScreen({ sets, edits, catalog, simulationId, position, reload }: Props) {
   const auth = useAuth();
+  const [drafts, setDrafts] = useState<Drafts>({});
+  const unsaved = Object.values(drafts).reduce((n, d) => n + Object.keys(d).length, 0);
+  // Не загубити незбережене: браузер перепитає перед закриттям вкладки.
+  useEffect(() => {
+    if (!unsaved) return;
+    const warn = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = ''; };
+    window.addEventListener('beforeunload', warn);
+    return () => window.removeEventListener('beforeunload', warn);
+  }, [unsaved]);
   const available = sets.filter((s) => s.pkg && s.original);
   const set = available.find((s) => s.entry.id === simulationId) ?? available[0];
 
@@ -64,13 +93,25 @@ export function EditScreen({ sets, edits, catalog, simulationId, position, reloa
   }
   if (!set) return <main className="admin" id="main"><p className="hint">Немає доступних симуляцій.</p></main>;
   const template = available.find((s) => s.entry.id === catalog.defaultSimulationId && !s.custom) ?? available.find((s) => !s.custom) ?? null;
-  return <Editor key={set.entry.id} set={set} sets={available} edits={edits} template={template?.original ?? null} position={position} reload={reload} />;
+  const simDrafts = drafts[set.entry.id] ?? {};
+  const setDraft = (qid: string, f: QuestionEdit | null) => setDrafts((all) => {
+    const cur = { ...(all[set.entry.id] ?? {}) };
+    if (f) cur[qid] = f; else delete cur[qid];
+    return { ...all, [set.entry.id]: cur };
+  });
+  return <Editor key={set.entry.id} set={set} sets={available} edits={edits} template={template?.original ?? null} position={position} reload={reload}
+    drafts={simDrafts} setDraft={setDraft} clearDrafts={(ids) => setDrafts((all) => {
+      const cur = { ...(all[set.entry.id] ?? {}) };
+      for (const id of ids) delete cur[id];
+      return { ...all, [set.entry.id]: cur };
+    })} />;
 }
 
 const statusLabel = (s: LoadedSet) => (s.custom && !s.custom.published ? ' (чернетка)' : s.hidden ? ' (схована)' : '');
 
-function Editor({ set, sets, edits, template, position, reload }: {
+function Editor({ set, sets, edits, template, position, reload, drafts, setDraft, clearDrafts }: {
   set: LoadedSet; sets: LoadedSet[]; edits: EditRow[]; template: ContentPackage | null; position: number; reload: () => Promise<void>;
+  drafts: Record<string, QuestionEdit>; setDraft: (qid: string, f: QuestionEdit | null) => void; clearDrafts: (ids: string[]) => void;
 }) {
   const pkg = set.pkg!;
   const original = set.original!;
@@ -83,6 +124,23 @@ function Editor({ set, sets, edits, template, position, reload }: {
   const simId = pkg.simulation.id;
   const go = (n: number) => navigate({ name: 'edit', simulationId: simId, position: n }, true);
   const edited = (x: Question) => !same(formOf(x), formOf(origById.get(x.id)!));
+  const baseline = useMemo(() => new Set(issuesOf(original)), [original]);
+  const posOf = (qid: string) => ordered.findIndex((x) => x.id === qid) + 1;
+  const draftIds = ordered.filter((x) => drafts[x.id]).map((x) => x.id);
+  const { busy, msg, setMsg, run } = useSaver(reload);
+
+  const saveAll = () => {
+    const bad = draftIds.filter((id) => errorsOf(original, baseline, origById.get(id)!, drafts[id]).length > 0);
+    if (bad.length) {
+      setMsg({ ok: false, text: `Є помилки в завданнях ${bad.map(posOf).join(', ')}. Виправте їх (вони позначені червоним) і збережіть ще раз.` });
+      return;
+    }
+    const ids = [...draftIds];
+    void run(async () => {
+      for (const id of ids) await persist(simId, origById.get(id)!, drafts[id]);
+      clearDrafts(ids);
+    }, `Збережено завдань: ${ids.length}.${set.hidden ? '' : ' Учні вже бачать нову версію.'}`);
+  };
 
   return (
     <main className="admin" id="main">
@@ -113,23 +171,44 @@ function Editor({ set, sets, edits, template, position, reload }: {
         <ol className="qgrid edit-grid">
           {ordered.map((x, i) => (
             <li key={x.id}>
-              <button type="button" className={`qcell${i + 1 === pos ? ' is-current' : ''}${edited(x) ? ' qcell--saved' : ''}`}
-                aria-current={i + 1 === pos ? 'step' : undefined} aria-label={`Завдання ${i + 1}${edited(x) ? ', змінено' : ''}`} onClick={() => go(i + 1)}>
+              <button type="button" className={`qcell${i + 1 === pos ? ' is-current' : ''}${drafts[x.id] ? ' qcell--draft_only' : edited(x) ? ' qcell--saved' : ''}`}
+                aria-current={i + 1 === pos ? 'step' : undefined} aria-label={`Завдання ${i + 1}${drafts[x.id] ? ', є незбережені зміни' : edited(x) ? ', змінено' : ''}`} onClick={() => go(i + 1)}>
                 <span className="qcell__num">{i + 1}</span>
-                {edited(x) && <Check className="qcell__mark" size={12} strokeWidth={3} aria-hidden />}
+                {!drafts[x.id] && edited(x) && <Check className="qcell__mark" size={12} strokeWidth={3} aria-hidden />}
               </button>
             </li>
           ))}
         </ol>
       </nav>
+      <p className="hint edit-legend"><span className="lg lg--saved" aria-hidden><Check size={10} strokeWidth={3} /></span> змінено й збережено · <span className="lg lg--draft" aria-hidden /> є незбережені зміни</p>
 
-      <QuestionForm key={q.id} q={q} orig={orig} pkg={pkg} original={original} baseDir={set.baseDir} position={pos} live={!set.hidden} reload={reload} />
+      <QuestionForm key={q.id} q={q} orig={orig} pkg={pkg} original={original} baseline={baseline} baseDir={set.baseDir} position={pos} live={!set.hidden} reload={reload}
+        draft={drafts[q.id]} setDraft={(f) => { setMsg(null); setDraft(q.id, f); }} />
 
       <div className="side-nav">
         <button type="button" className="btn btn--ghost" onClick={() => go(pos - 1)} disabled={pos <= 1}><ChevronLeft size={20} aria-hidden /> Попереднє</button>
         <span className="side-nav__pos">Завдання <strong>{pos}</strong> з {total}</span>
         <button type="button" className="btn btn--ghost" onClick={() => go(pos + 1)} disabled={pos >= total}>Наступне <ChevronRight size={20} aria-hidden /></button>
       </div>
+
+      {(draftIds.length > 0 || msg) && (
+        <div className="edit-savebar" role="region" aria-label="Збереження всіх змін">
+          <div className="edit-savebar__inner">
+            {draftIds.length > 0 ? (
+              <p className="edit-savebar__text">Не збережено: {draftIds.length === 1 ? 'завдання' : 'завдання'} {draftIds.map((id) => (
+                <button key={id} type="button" className="edit-savebar__num" onClick={() => go(posOf(id))}>{posOf(id)}</button>
+              ))}</p>
+            ) : <p className="edit-savebar__text" />}
+            {msg && <Status msg={msg} />}
+            {draftIds.length > 0 && (
+              <div className="edit-actions">
+                <button type="button" className="btn btn--ghost btn--sm" disabled={busy} onClick={() => { clearDrafts(draftIds); setMsg(null); }}>Скасувати все</button>
+                <button type="button" className="btn btn--primary btn--sm" disabled={busy} onClick={saveAll}><Save size={16} aria-hidden /> {busy ? 'Збереження…' : 'Зберегти все'}</button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </main>
   );
 }
@@ -479,32 +558,30 @@ function Area({ label, value, onChange, rows = 3 }: { label: string; value: stri
   );
 }
 
-function QuestionForm({ q, orig, pkg, original, baseDir, position, live, reload }: {
-  q: Question; orig: Question; pkg: ContentPackage; original: ContentPackage; baseDir: string; position: number; live: boolean; reload: () => Promise<void>;
+function QuestionForm({ q, orig, pkg, original, baseline, baseDir, position, live, reload, draft, setDraft }: {
+  q: Question; orig: Question; pkg: ContentPackage; original: ContentPackage; baseline: Set<string>; baseDir: string; position: number; live: boolean;
+  reload: () => Promise<void>; draft: QuestionEdit | undefined; setDraft: (f: QuestionEdit | null) => void;
 }) {
   const saved = useMemo(() => formOf(q), [q]);
-  const [f, setF] = useState<QuestionEdit>(saved);
-  // Після збереження завдання перезавантажуються з бази — форма бере нову збережену версію.
-  useEffect(() => { setF(saved); }, [saved]);
+  // Незбережене зберігається в редакторі, тож можна перейти до іншого завдання й повернутися.
+  const f = draft ?? saved;
   const { busy, msg, setMsg, run } = useSaver(reload);
-  const set = (patch: Partial<QuestionEdit>) => { setMsg(null); setF((cur) => ({ ...cur, ...patch })); };
+  const set = (patch: Partial<QuestionEdit>) => {
+    setMsg(null);
+    const next = { ...f, ...patch };
+    setDraft(same(next, saved) ? null : next);
+  };
   const setIn = (k: 'options' | 'matchingRows' | 'matchingOptions', id: string, v: string) => set({ [k]: { ...f[k], [id]: v } });
 
-  const preview = useMemo(() => applyQuestionEdit(orig, { ...f, textExplanation: f.textExplanation?.trim() ? f.textExplanation : null }), [orig, f]);
+  const preview = useMemo(() => previewOf(orig, f), [orig, f]);
   const changed = !same(f, saved);
   const isEdited = !same(saved, formOf(orig));
 
   // Перевірка тим самим валідатором, що й при завантаженні сайту: зламану формулу чи ключ зберегти не вийде.
-  const baseline = useMemo(() => new Set(issuesOf(original)), [original]);
-  const errors = useMemo(() => {
-    const cand: ContentPackage = { ...original, questions: original.questions.map((x) => (x.id === q.id ? preview : x)) };
-    return issuesOf(cand).filter((m) => !baseline.has(m));
-  }, [original, preview, q.id, baseline]);
+  const errors = useMemo(() => errorsOf(original, baseline, orig, f), [original, baseline, orig, f]);
 
   const save = () => {
-    const data: QuestionEdit = { ...f, textExplanation: f.textExplanation?.trim() ? f.textExplanation : null };
-    if (!f.assets?.length && !orig.assets?.length) delete data.assets;
-    void run(() => (same(formOf(preview), formOf(orig)) ? deleteEdit(pkg.simulation.id, q.id) : saveEdit(pkg.simulation.id, q.id, data)), live ? 'Збережено. Учні вже бачать нову версію.' : 'Збережено.');
+    void run(async () => { await persist(pkg.simulation.id, orig, f); setDraft(null); }, live ? 'Збережено. Учні вже бачать нову версію.' : 'Збережено.');
   };
 
   const key = f.answerKey as { optionId?: string; pairs?: Record<string, string>; value?: string };
@@ -567,7 +644,7 @@ function QuestionForm({ q, orig, pkg, original, baseDir, position, live, reload 
           <button type="button" className="btn btn--primary" disabled={busy || !changed || errors.length > 0} onClick={save}>
             <Save size={18} aria-hidden /> Зберегти
           </button>
-          {changed && <button type="button" className="btn btn--ghost" disabled={busy} onClick={() => { setF(saved); setMsg(null); }}>Скасувати зміни</button>}
+          {changed && <button type="button" className="btn btn--ghost" disabled={busy} onClick={() => { setDraft(null); setMsg(null); }}>Скасувати зміни</button>}
           {isEdited && !changed && (
             <button type="button" className="btn btn--ghost" disabled={busy}
               onClick={() => void run(() => deleteEdit(pkg.simulation.id, q.id), 'Повернуто початковий текст завдання.')}>
