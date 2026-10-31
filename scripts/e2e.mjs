@@ -56,7 +56,7 @@ await step('стартовий екран: №23, логотип веде на �
   for (const bad of ['Matanschool', 'matanschool', 'Курси', 'Меню', 'Демонстраційний']) assert(!body.includes(bad), `знайдено «${bad}»`);
   assert(await page.locator('a.brand').getAttribute('href') === '/', 'логотип не веде на головну');
   await page.getByRole('button', { name: 'Обрати симуляцію' }).click();
-  assert(await page.locator('.selector__item').count() === 1, 'у виборі не 1 набір');
+  assert(await page.locator('.selector__item').count() === 2, 'у виборі не 2 набори (№23 і №3)');
   await page.keyboard.press('Escape');
   await page.screenshot({ path: 'e2e-shots/01-home-1280.png', fullPage: true });
 });

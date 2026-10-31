@@ -316,6 +316,9 @@ pkg = {"schemaVersion": 1, "simulation": sim, "questions": Q,
 json.dump(pkg, open(OUT + "package.json", "w"), ensure_ascii=False, indent=2)
 print(len(Q), "питань")
 
-cat = {"schemaVersion": 1, "defaultSimulationId": SID, "demoSimulationId": None, "entries": [
-    {"id": SID, "title": sim["title"], "package": f"sets/{SID}/package.json", "videoMap": None}]}
-json.dump(cat, open("public/content/catalog.json", "w"), ensure_ascii=False, indent=2)
+# Каталог: оновлюємо лише свій запис, інші набори (напр. nmt-3) зберігаються.
+cat_path = "public/content/catalog.json"
+cat = json.load(open(cat_path)) if os.path.exists(cat_path) else {"schemaVersion": 1, "defaultSimulationId": SID, "demoSimulationId": None, "entries": []}
+entry = {"id": SID, "title": sim["title"], "package": f"sets/{SID}/package.json", "videoMap": None}
+cat["entries"] = [entry if e["id"] == SID else e for e in cat["entries"]] if any(e["id"] == SID for e in cat["entries"]) else [entry] + cat["entries"]
+json.dump(cat, open(cat_path, "w"), ensure_ascii=False, indent=2)
