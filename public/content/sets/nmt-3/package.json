@@ -4,7 +4,7 @@
     "id": "nmt-3",
     "title": "Симуляція НМТ №3",
     "subject": "Математика",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "durationSeconds": 5400,
     "orderedQuestionIds": [
       "nmt3-q01",

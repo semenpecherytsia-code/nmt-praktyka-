@@ -294,7 +294,7 @@ SCORING = [{"id": "nmt-math-22", "questionCount": 22, "maxTotal": 32, "layout": 
 REFERENCE = [{"id": "nmt-reference", "title": "Довідкові матеріали", "kind": "images", "pages": [{"src": "reference/page-1.png", "alt": "Довідкові матеріали, сторінка 1: таблиця квадратів, алгебра і початки аналізу"}, {"src": "reference/page-2.png", "alt": "Довідкові матеріали, сторінка 2: похідна, первісна, тригонометрія"}, {"src": "reference/page-3.png", "alt": "Довідкові матеріали, сторінка 3: геометрія, координати та вектори"}], "downloadSrc": "reference/dovidkovi-materialy.pdf"}]
 CONVERSION = json.load(open("public/content/sets/nmt-23/package.json"))["conversionTables"]
 
-sim = {"id": SID, "title": "Симуляція НМТ №3", "subject": "Математика", "version": "1.0.0",
+sim = {"id": SID, "title": "Симуляція НМТ №3", "subject": "Математика", "version": "1.0.1",
        "durationSeconds": 5400, "orderedQuestionIds": [q["id"] for q in Q], "referenceMaterialId": "nmt-reference",
        "scoringProfileId": "nmt-math-22", "conversionTableId": CONVERSION[0]["id"], "readiness": "complete", "isDemo": False,
        "source": {"kind": "imported", "note": "Завдання й ключі надав власник сайту. Рисунки намальовано у SVG."}}
