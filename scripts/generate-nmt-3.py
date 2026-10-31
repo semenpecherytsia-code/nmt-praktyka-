@@ -175,7 +175,19 @@ F2 = fig(2, chart(), "Діаграма зміни вартості EcoFlow по�
 F6 = fig(6, pyramid(), "Чотирикутна піраміда SABCD, невидимі ребра SB, AB і BC позначено штрихом")
 F14 = fig(14, trapezoid(), "Трапеція ABCD з діагоналлю AC; DH — перпендикуляр з вершини D до AC")
 F18 = fig(18, rhombus_triangle(), "Ромб ABCD і рівнобедрений трикутник BEC зі спільною стороною BC; EB = EC")
-F20 = fig(20, gels(), "На полиці в ряд стоять п’ять гелів для прання: Ariel, Persil, Perwoll, Savex, Coccolino")
+def gels_photo():
+    """Рисунок гелів від власника сайту (обрізано білі поля, знизу місце під кнопку збільшення)."""
+    shutil.copy("scripts/source-images/q20-gels.png", OUT + "assets/q20-gels.png")
+    # Спроби, розпочаті раніше, посилаються на q20-gels.svg — там той самий рисунок.
+    import base64
+    b64 = base64.b64encode(open("scripts/source-images/q20-gels.png", "rb").read()).decode()
+    open(OUT + "assets/q20-gels.svg", "w").write(
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 731 314" width="731" height="314">'
+        f'<image width="731" height="314" href="data:image/png;base64,{b64}"/></svg>\n')
+    return {"src": "assets/q20-gels.png", "width": 731, "height": 314}
+
+
+F20 = fig(20, gels_photo(), "На полиці в ряд стоять п’ять гелів для прання: Ariel, Persil, Perwoll, Savex, Coccolino")
 F21 = fig(21, cylinder_prism(), "Циліндр і правильна чотирикутна призма однакової висоти")
 
 
