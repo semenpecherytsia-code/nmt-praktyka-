@@ -40,7 +40,7 @@ export function resolveContentUrl(raw: string, baseDir: string): string | null {
 }
 
 /** Вбудовані плеєри, які можна показувати в iframe. */
-export const ALLOWED_EMBED_HOSTS = ['www.youtube-nocookie.com', 'www.youtube.com', 'player.vimeo.com'];
+export const ALLOWED_EMBED_HOSTS = ['www.youtube-nocookie.com', 'www.youtube.com', 'player.vimeo.com', 'iframe.mediadelivery.net'];
 
 export function checkEmbedUrl(raw: string): string | null {
   const err = checkContentUrl(raw);

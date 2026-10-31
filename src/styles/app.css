@@ -649,3 +649,6 @@ label.btn { cursor: pointer; }
 .edit-images__fields input { width: 100%; min-height: 40px; border: 1px solid var(--control-border); border-radius: var(--r-field); padding: 6px 10px; font: inherit; font-size: 14px; box-sizing: border-box; background: var(--surface); color: var(--text); }
 .edit-add { justify-self: start; }
 @media (max-width: 420px) { .edit-images li { grid-template-columns: 1fr; } }
+.edit-video { display: grid; grid-template-columns: minmax(0, 1fr) 140px; gap: 10px; }
+@media (max-width: 420px) { .edit-video { grid-template-columns: 1fr; } }
+.edit-preview .video__frame iframe { width: 100%; aspect-ratio: 16 / 9; border: 0; border-radius: 12px; }

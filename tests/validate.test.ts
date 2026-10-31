@@ -108,3 +108,18 @@ describe('перевірка імпорту', () => {
     expect(f).toContain('таблиця переведення «t»|map.2');
   });
 });
+
+describe('відеопояснення з редактора', () => {
+  it('Bunny і файл проходять, некоректні — ні', () => {
+    const p = clone(demoPackage());
+    p.questions[0].video = { provider: 'bunny', libraryId: '123456', videoId: '0f1e2d3c-4b5a-6978-8a9b-acbdcedfe0f1' };
+    p.questions[1].video = { provider: 'file', src: 'https://x.supabase.co/storage/v1/object/public/content/a.mp4' };
+    expect(fields(validatePackage(p, demoVideoMap()))).toEqual([]);
+    p.questions[0].video = { provider: 'bunny', libraryId: 'abc', videoId: 'nope' };
+    p.questions[1].video = { provider: 'file', src: 'javascript:alert(1)' };
+    const f = fields(validatePackage(p, demoVideoMap()));
+    expect(f.some((x) => x.endsWith('video.libraryId'))).toBe(true);
+    expect(f.some((x) => x.endsWith('video.videoId'))).toBe(true);
+    expect(f.some((x) => x.endsWith('video.src'))).toBe(true);
+  });
+});

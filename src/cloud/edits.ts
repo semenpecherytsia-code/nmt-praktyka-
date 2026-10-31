@@ -1,6 +1,6 @@
 // Правки адміністратора до тексту завдань. Зберігаються в Supabase (таблиця content_edits),
 // читати може кожен, змінювати — лише адміністратор (перевіряє сама база).
-import type { ContentPackage, ImageAsset, Question, ReferenceMaterial } from '../content/types';
+import type { QuestionVideo, ContentPackage, ImageAsset, Question, ReferenceMaterial } from '../content/types';
 import { supabase } from './cloud';
 
 /** Що можна змінити в завданні. Ідентифікатори варіантів і пунктів не змінюються. */
@@ -13,6 +13,8 @@ export interface QuestionEdit {
   answerKey?: { optionId: string } | { pairs: Record<string, string> } | { value: string };
   /** Рисунки до умови. Відсутнє поле — рисунки з пакета без змін. */
   assets?: ImageAsset[];
+  /** Відео Bunny. null — прибрати; відсутнє поле — без змін. */
+  video?: QuestionVideo | null;
 }
 
 /** question_id = SIM_KEY — правка самої симуляції (назва, предмет). */
@@ -57,6 +59,7 @@ export function applyQuestionEdit(q: Question, e: QuestionEdit): Question {
     statement: typeof e.statement === 'string' ? e.statement : q.statement,
     textExplanation: e.textExplanation !== undefined ? e.textExplanation : q.textExplanation,
     assets: Array.isArray(e.assets) ? (e.assets.length ? e.assets : undefined) : q.assets,
+    video: e.video !== undefined ? e.video : q.video,
   };
   switch (q.type) {
     case 'single_choice':

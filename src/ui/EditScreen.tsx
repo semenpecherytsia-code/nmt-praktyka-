@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, Check, ChevronLeft, ChevronRight, Eye, EyeOff, FileText, ImagePlus, Plus, RotateCcw, Save, ShieldAlert, Trash2, Upload } from 'lucide-react';
 import type { LoadedSet } from '../content/load';
-import type { Catalog, ContentPackage, ImageAsset, Question, ReferenceMaterial } from '../content/types';
+import { bunnyEmbedUrl, type BunnyVideo, type QuestionVideo, type Catalog, type ContentPackage, type ImageAsset, type Question, type ReferenceMaterial } from '../content/types';
 import { validatePackage } from '../content/validate';
 import type { AnswerValue } from '../engine/answers';
 import { orderedQuestions } from '../engine/attempt';
@@ -33,7 +33,7 @@ interface Props {
 /** Поля форми: увесь текст завдання, який можна змінити, і правильна відповідь. */
 function formOf(q: Question): QuestionEdit {
   const map = (xs: { id: string; content: string }[]) => Object.fromEntries(xs.map((x) => [x.id, x.content]));
-  const base = { statement: q.statement, textExplanation: q.textExplanation ?? '', assets: q.assets ?? [] };
+  const base = { statement: q.statement, textExplanation: q.textExplanation ?? '', assets: q.assets ?? [], video: q.video ?? null };
   switch (q.type) {
     case 'single_choice': return { ...base, options: map(q.options), answerKey: { ...q.answerKey } };
     case 'matching': return { ...base, matchingRows: map(q.matchingRows), matchingOptions: map(q.matchingOptions), answerKey: { pairs: { ...q.answerKey.pairs } } };
@@ -324,6 +324,88 @@ function ReferenceForm({ pkg, original, baseDir, isEdited, reload }: {
   );
 }
 
+const LIB_KEY = 'nmt.v1.bunnyLibrary';
+const GUID = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
+
+/** Розбирає те, що вставили: посилання Bunny (embed/play) або сам Video ID. */
+export function parseBunny(raw: string, library: string): BunnyVideo | null {
+  const s = raw.trim();
+  const link = s.match(/mediadelivery\.net\/(?:embed|play)\/(\d+)\/([0-9a-f-]{36})/i);
+  if (link) return { provider: 'bunny', libraryId: link[1], videoId: link[2].toLowerCase() };
+  const id = s.match(GUID);
+  if (id && /^\d+$/.test(library.trim())) return { provider: 'bunny', libraryId: library.trim(), videoId: id[0].toLowerCase() };
+  return null;
+}
+
+/** Найбільший відеофайл, який приймає сховище сайту (безкоштовний план Supabase — 50 МБ). */
+const MAX_VIDEO_MB = 50;
+
+/** Відеопояснення: Video ID з Bunny Stream (або посилання) чи власний файл MP4. */
+function VideoField({ value, pkg, onChange, onError }: {
+  value: QuestionVideo | null; pkg: ContentPackage; onChange: (v: QuestionVideo | null) => void; onError: (t: string) => void;
+}) {
+  const bunny = value?.provider === 'bunny' ? value : null;
+  const known = bunny?.libraryId ?? pkg.questions.map((q) => q.video).find((v): v is BunnyVideo => v?.provider === 'bunny')?.libraryId
+    ?? (() => { try { return localStorage.getItem(LIB_KEY) ?? ''; } catch { return ''; } })();
+  const [library, setLibrary] = useState(known);
+  const [raw, setRaw] = useState(bunny?.videoId ?? '');
+  const [busy, setBusy] = useState(false);
+  useEffect(() => { setRaw(bunny?.videoId ?? ''); if (bunny) setLibrary(bunny.libraryId); }, [bunny?.videoId, bunny?.libraryId]); // eslint-disable-line react-hooks/exhaustive-deps
+  const apply = (r: string, lib: string) => {
+    setRaw(r); setLibrary(lib);
+    if (!r.trim()) { if (bunny) onChange(null); return; }
+    const v = parseBunny(r, lib);
+    if (v) {
+      if (v.libraryId !== lib) setLibrary(v.libraryId);
+      try { localStorage.setItem(LIB_KEY, v.libraryId); } catch { /* немає сховища */ }
+      if (v.videoId !== bunny?.videoId || v.libraryId !== bunny?.libraryId) onChange(v);
+    }
+  };
+  const upload = async (file: File | undefined) => {
+    if (!file) return;
+    if (!file.type.startsWith('video/')) { onError('Оберіть відеофайл (MP4).'); return; }
+    if (file.size > MAX_VIDEO_MB * 1024 * 1024) { onError(`Файл більший за ${MAX_VIDEO_MB} МБ. Завантажте його в Bunny і вставте Video ID.`); return; }
+    setBusy(true);
+    try {
+      const src = await uploadFile(pkg.simulation.id, file);
+      setRaw('');
+      onChange({ provider: 'file', src, mimeType: file.type || 'video/mp4' });
+    } catch (e) {
+      onError(`Не вдалося завантажити відео: ${(e as Error).message}`);
+    } finally {
+      setBusy(false);
+    }
+  };
+  const parsed = raw.trim() ? parseBunny(raw, library) : null;
+  return (
+    <div className="edit-field">
+      <span>Відеопояснення</span>
+      {value?.provider === 'file' ? (
+        <p className="edit-file"><FileText size={18} aria-hidden /> Завантажений відеофайл · <a href={value.src} target="_blank" rel="noreferrer">відкрити</a></p>
+      ) : (
+        <>
+          <div className="edit-video">
+            <label className="edit-field"><span>Bunny: Video ID або посилання</span>
+              <input value={raw} onChange={(e) => apply(e.target.value, library)} placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" spellCheck={false} autoComplete="off" />
+            </label>
+            <label className="edit-field"><span>Library ID</span>
+              <input value={library} onChange={(e) => apply(raw, e.target.value)} inputMode="numeric" placeholder="123456" spellCheck={false} autoComplete="off" />
+            </label>
+          </div>
+          {raw.trim() && !parsed && <p className="edit-status is-err">Не схоже на Video ID Bunny. У Bunny: Stream → бібліотека → відео, скопіюйте Video ID; Library ID видно в налаштуваннях бібліотеки (API).</p>}
+        </>
+      )}
+      <div className="edit-actions">
+        <label className={`btn btn--outline btn--sm${busy ? ' is-disabled' : ''}`}>
+          <Upload size={16} aria-hidden /> {busy ? 'Завантаження…' : value?.provider === 'file' ? 'Замінити файл' : `Або завантажити файл (до ${MAX_VIDEO_MB} МБ)`}
+          <input type="file" accept="video/mp4,video/*" hidden disabled={busy} onChange={(e) => { void upload(e.target.files?.[0]); e.target.value = ''; }} />
+        </label>
+        {value && <button type="button" className="btn btn--ghost btn--sm edit-danger" onClick={() => { setRaw(''); onChange(null); }}><Trash2 size={16} aria-hidden /> Прибрати відео</button>}
+      </div>
+    </div>
+  );
+}
+
 /** Рисунки до умови: додати, підписати, прибрати, змінити порядок. */
 function ImagesField({ simId, qid, assets, baseDir, onChange, onError }: {
   simId: string; qid: string; assets: ImageAsset[]; baseDir: string; onChange: (a: ImageAsset[]) => void; onError: (t: string) => void;
@@ -474,6 +556,7 @@ function QuestionForm({ q, orig, pkg, original, baseDir, position, live, reload 
         )}
 
         <Area label="Пояснення (видно після завершення)" value={f.textExplanation ?? ''} onChange={(v) => set({ textExplanation: v })} rows={5} />
+        <VideoField value={f.video ?? null} pkg={pkg} onChange={(video) => set({ video })} onError={(text) => setMsg({ ok: false, text })} />
 
         {errors.length > 0 && (
           <div className="notice notice--warn" role="alert"><ShieldAlert size={18} aria-hidden />
@@ -506,6 +589,15 @@ function QuestionForm({ q, orig, pkg, original, baseDir, position, live, reload 
         </div>
         {preview.textExplanation && (
           <div className="edit-expl"><p className="eyebrow">Пояснення</p><RichText text={preview.textExplanation} /></div>
+        )}
+        {preview.video && (
+          <div className="edit-expl"><p className="eyebrow">Відеопояснення</p>
+            <div className="video__frame">{preview.video.provider === 'bunny' ? (
+              <iframe src={bunnyEmbedUrl(preview.video)} title="Відеопояснення" loading="lazy"
+                allow="encrypted-media; fullscreen; picture-in-picture" allowFullScreen referrerPolicy="strict-origin-when-cross-origin"
+                sandbox="allow-scripts allow-same-origin allow-presentation allow-popups" />
+            ) : <video src={preview.video.src} controls preload="metadata" playsInline />}</div>
+          </div>
         )}
       </section>
     </div>
