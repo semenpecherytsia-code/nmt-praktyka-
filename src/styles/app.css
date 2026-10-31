@@ -150,7 +150,8 @@ img { max-width: 100%; height: auto; }
 .math-block::-webkit-scrollbar, .choice__content::-webkit-scrollbar, .matching__col li > .rich::-webkit-scrollbar,
 .dnd__item > .rich::-webkit-scrollbar, .mchip__text::-webkit-scrollbar { display: none; }
 .math-block .katex-display { margin: 0.4em 0; }
-.math-inline .katex { white-space: nowrap; }
+/* Довга формула в рядку переноситься після знаків «=», «+» тощо (кожна частина KaTeX сама не розривається). */
+.math-inline .katex { white-space: normal; }
 .katex { font-size: 1.12em; }
 .question__foot { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding-top: 8px; border-top: 1px solid var(--border); padding-top: 20px; }
 .save-status { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; font-size: 15px; color: var(--text-2); min-height: 24px; }
