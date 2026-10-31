@@ -38,11 +38,25 @@ function localMedia(): Plugin {
   };
 }
 
-// VITE_BASE задає базовий шлях. За замовчуванням './' — збірка працює з будь-якої папки
-// (корінь домену, GitHub Pages /repo/, підпапка), бо маршрутизація побудована на hash (#/...).
+// GitHub Pages віддає 404.html для будь-якої невідомої адреси (напр. /admin) — робимо його копією index.html,
+// щоб застосунок відкривався з будь-якого посилання.
+function spaFallback(): Plugin {
+  return {
+    name: 'spa-404',
+    apply: 'build',
+    closeBundle() {
+      const dist = path.resolve(import.meta.dirname, 'dist');
+      const index = path.join(dist, 'index.html');
+      if (fs.existsSync(index)) fs.copyFileSync(index, path.join(dist, '404.html'));
+    },
+  };
+}
+
+// VITE_BASE задає базовий шлях. За замовчуванням '/' — сайт у корені домену (matannmt.com).
+// Для підпапки: VITE_BASE=/назва-папки/ npm run build
 export default defineConfig({
-  base: process.env.VITE_BASE ?? './',
-  plugins: [react(), localMedia()],
+  base: process.env.VITE_BASE ?? '/',
+  plugins: [react(), localMedia(), spaFallback()],
   build: { target: 'es2022', chunkSizeWarningLimit: 1500 },
   test: { environment: 'node', include: ['tests/**/*.test.ts'] },
 } as any);

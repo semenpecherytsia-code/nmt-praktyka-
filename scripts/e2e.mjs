@@ -54,7 +54,7 @@ await step('стартовий екран: №23, логотип веде на �
   assert(/22/.test(stats) && /90 хв/.test(stats) && /32/.test(stats), stats);
   const body = await page.locator('body').innerText();
   for (const bad of ['Matanschool', 'matanschool', 'Курси', 'Меню', 'Демонстраційний']) assert(!body.includes(bad), `знайдено «${bad}»`);
-  assert(await page.locator('a.brand').getAttribute('href') === '#/', 'логотип не веде на головну');
+  assert(await page.locator('a.brand').getAttribute('href') === '/', 'логотип не веде на головну');
   await page.getByRole('button', { name: 'Обрати симуляцію' }).click();
   assert(await page.locator('.selector__item').count() === 1, 'у виборі не 1 набір');
   await page.keyboard.press('Escape');
@@ -83,7 +83,7 @@ await step('довідник до старту: 3 сторінки-зображ�
 let attemptId;
 await step('старт: 90 хвилин, 22 номери, перша стрілка вимкнена', async () => {
   await page.getByRole('button', { name: 'Розпочати симуляцію' }).click();
-  await page.waitForURL(/#\/attempt\/.+\/q\/1$/);
+  await page.waitForURL(/\/attempt\/.+\/q\/1$/);
   attemptId = page.url().match(/attempt\/([^/]+)/)[1];
   const s = await timerSeconds(page);
   assert(s <= 5400 && s >= 5390, `таймер ${s}`);
@@ -238,7 +238,7 @@ await step('перезавантаження: чернетка й позиція
   await page.reload();
   await page.waitForURL(/q\/20$/);
   assert(await page.getByLabel('Ваша відповідь').inputValue() === '1,5', 'чернетка зникла');
-  await page.goto(BASE + '#/');
+  await page.goto(BASE);
   await page.getByRole('button', { name: 'Продовжити' }).waitFor();
   await page.getByText('Залишилось').waitFor();
   assert(!(await page.getByRole('button', { name: 'Обрати симуляцію' }).count()), 'під час тесту можна обрати іншу симуляцію');
@@ -327,7 +327,7 @@ await step('відео: доки його не додано, показуєть�
 });
 
 await step('завершену спробу не можна змінити через адресу питання', async () => {
-  await page.goto(BASE + `#/attempt/${attemptId}/q/3`);
+  await page.goto(BASE + `attempt/${attemptId}/q/3`);
   await page.waitForURL(/review$/);
 });
 
@@ -339,10 +339,10 @@ await step('«Пройти ще раз»: нова спроба, новий та
   assert(attempt2 !== attemptId, 'та сама спроба');
   assert(await timerSeconds(page) >= 5395, 'таймер не новий');
   assert(await page.locator('.exam-side .qcell--saved').count() === 0, 'відповіді перенеслися');
-  await page.goto(BASE + `#/attempt/${attempt2}/review`);
+  await page.goto(BASE + `attempt/${attempt2}/review`);
   await page.waitForURL(/q\/1$/);
   assert(!(await page.getByText('Розв’язання').count()), 'розбір незавершеної спроби відкрився');
-  await page.goto(BASE + '#/');
+  await page.goto(BASE);
   await page.getByText('Попередні спроби').waitFor();
   assert((await page.locator('.history').innerText()).includes('9 з 32'), 'старого результату немає');
 });
@@ -350,9 +350,9 @@ await step('«Пройти ще раз»: нова спроба, новий та
 await step('друга вкладка з тією самою спробою отримує попередження', async () => {
   const p2 = await ctx.newPage();
   watch(p2);
-  await page.goto(BASE + `#/attempt/${attempt2}/q/1`);
+  await page.goto(BASE + `attempt/${attempt2}/q/1`);
   await page.waitForTimeout(300);
-  await p2.goto(BASE + `#/attempt/${attempt2}/q/1`);
+  await p2.goto(BASE + `attempt/${attempt2}/q/1`);
   await p2.getByText('Спробу відкрито в іншій вкладці').waitFor();
   await p2.screenshot({ path: 'e2e-shots/11-second-tab-1280.png' });
   await p2.getByRole('button', { name: 'Працювати тут' }).click();
@@ -361,7 +361,7 @@ await step('друга вкладка з тією самою спробою от
 });
 
 await step('закінчення часу: одне автоматичне завершення із зарахуванням коректних чернеток', async () => {
-  await page.goto(BASE + `#/attempt/${attempt2}/q/19`);
+  await page.goto(BASE + `attempt/${attempt2}/q/19`);
   await page.getByRole('button', { name: 'Працювати тут' }).click().catch(() => {});
   await page.getByLabel('Ваша відповідь').fill('6'); // чернетка без збереження
   await page.waitForTimeout(200);
@@ -382,7 +382,7 @@ await step('закінчення часу: одне автоматичне за�
 });
 
 await step('ширини 1440 і 768 без горизонтальної прокрутки', async () => {
-  await page.goto(BASE + '#/');
+  await page.goto(BASE);
   await page.getByRole('button', { name: 'Розпочати симуляцію' }).click();
   await page.waitForURL(/q\/1$/);
   for (const w of [1440, 768]) {
@@ -394,7 +394,7 @@ await step('ширини 1440 і 768 без горизонтальної про�
     }
     await page.goto(page.url().replace(/q\/\d+$/, 'q/16'));
     await page.screenshot({ path: `e2e-shots/12-exam-matching-${w}.png`, fullPage: true });
-    await page.goto(BASE + `#/attempt/${attemptId}/review`);
+    await page.goto(BASE + `attempt/${attemptId}/review`);
     await page.waitForTimeout(200);
     await noHScroll(page);
     await page.screenshot({ path: `e2e-shots/13-review-${w}.png` });
@@ -411,7 +411,7 @@ for (const w of [360, 390]) {
   const p = await m.newPage();
   watch(p);
   await step(`${w}: старт, сітка в аркуші, відповідності дотиком, без горизонтальної прокрутки`, async () => {
-    await p.goto(BASE + '#/sim/nmt-23');
+    await p.goto(BASE + 'sim/nmt-23');
     await p.getByRole('button', { name: 'Розпочати симуляцію' }).waitFor();
     await noHScroll(p);
     await p.getByRole('button', { name: 'Розпочати симуляцію' }).tap();

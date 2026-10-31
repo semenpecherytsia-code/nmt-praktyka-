@@ -7,7 +7,7 @@ import type { AnswerValue } from '../engine/answers';
 import { orderedQuestions } from '../engine/attempt';
 import { signIn, useAuth } from '../cloud/cloud';
 import { applyQuestionEdit, deleteEdit, saveEdit, SIM_KEY, type QuestionEdit } from '../cloud/edits';
-import { navigate } from '../router';
+import { navigate, routeHref } from '../router';
 import { RichText } from './RichText';
 import { Figure } from './Figure';
 import { SingleChoice } from './answers/SingleChoice';
@@ -76,7 +76,7 @@ function Editor({ set, sets, position, reload }: { set: LoadedSet; sets: LoadedS
     <main className="admin" id="main">
       <div className="admin__head">
         <h1 className="admin__title">Редагування завдань</h1>
-        <a className="btn btn--ghost btn--sm" href="#/admin"><ArrowLeft size={16} aria-hidden /> Результати учнів</a>
+        <a className="btn btn--ghost btn--sm" data-link href={routeHref({ name: 'admin' })}><ArrowLeft size={16} aria-hidden /> Результати учнів</a>
       </div>
 
       <div className="notice notice--info">

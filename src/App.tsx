@@ -4,7 +4,7 @@ import { loadAll, type LoadedSet } from './content/load';
 import type { Catalog, ContentPackage } from './content/types';
 import { abandonAttempt, createAttempt, finishAttempt, isExpired, type Attempt } from './engine/attempt';
 import { AttemptRepo, browserKV, TabLease } from './engine/storage';
-import { navigate, useRoute, type Route } from './router';
+import { navigate, routeHref, useRoute, type Route } from './router';
 import { overlayTransition, resolveScreen, type Overlay, type OverlayEvent } from './machine';
 import { StartScreen } from './ui/StartScreen';
 import { ExamScreen } from './ui/ExamScreen';
@@ -31,7 +31,7 @@ function Top({ exam = false }: { exam?: boolean }) {
 
 function Brand() {
   return (
-    <a className="brand" href="#/" aria-label={`${APP_CONFIG.appName} — на головну`}>
+    <a className="brand" data-link href={routeHref({ name: 'home' })} aria-label={`${APP_CONFIG.appName} — на головну`}>
       <svg width="28" height="28" viewBox="0 0 32 32" aria-hidden><rect width="32" height="32" rx="9" fill="var(--accent)" /><path d="M9 22V10l7 8 7-8v12" stroke="#fff" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" /></svg>
       <span>{APP_CONFIG.appName}</span>
     </a>

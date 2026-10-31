@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { overlayTransition, resolveScreen } from '../src/machine';
-import { parseRoute, routeHash } from '../src/router';
+import { parseRoute, routePath } from '../src/router';
 import { createAttempt, finishAttempt } from '../src/engine/attempt';
 import { demoPackage } from './helpers';
 
@@ -25,7 +25,7 @@ describe('модель станів', () => {
   });
   it('маршрути туди й назад', () => {
     for (const r of [{ name: 'home' } as const, { name: 'home', simulationId: 'nmt-23' } as const, { name: 'attempt', attemptId: 'a1', position: 7 } as const, { name: 'review', attemptId: 'a1' } as const]) {
-      expect(parseRoute(routeHash(r))).toEqual(r);
+      expect(parseRoute(routePath(r))).toEqual(r);
     }
   });
 });

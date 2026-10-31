@@ -1,6 +1,7 @@
 import { Fragment, useEffect, useMemo, useState } from 'react';
 import { ChevronDown, ChevronRight, PenLine, RefreshCw, Search, ShieldAlert } from 'lucide-react';
 import { fetchAllResults, signIn, useAuth, type ResultRow } from '../cloud/cloud';
+import { routeHref } from '../router';
 import { formatDateTime, formatDuration, plural } from './format';
 
 interface Props { titleOf: (simId: string) => string | null }
@@ -77,7 +78,7 @@ export function AdminScreen({ titleOf }: Props) {
       <div className="admin__head">
         <h1 className="admin__title">Результати учнів</h1>
         <div className="admin__head-actions">
-          <a className="btn btn--outline btn--sm" href="#/edit"><PenLine size={16} aria-hidden /> Редагувати завдання</a>
+          <a className="btn btn--outline btn--sm" data-link href={routeHref({ name: 'edit', position: 1 })}><PenLine size={16} aria-hidden /> Редагувати завдання</a>
           <button type="button" className="btn btn--ghost btn--sm" onClick={load}><RefreshCw size={16} aria-hidden /> Оновити</button>
         </div>
       </div>
