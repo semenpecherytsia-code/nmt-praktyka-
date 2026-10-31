@@ -8,6 +8,12 @@
       "title": "Симуляція НМТ №23",
       "package": "sets/nmt-23/package.json",
       "videoMap": null
+    },
+    {
+      "id": "nmt-3",
+      "title": "Симуляція НМТ №3",
+      "package": "sets/nmt-3/package.json",
+      "videoMap": null
     }
   ]
 }
