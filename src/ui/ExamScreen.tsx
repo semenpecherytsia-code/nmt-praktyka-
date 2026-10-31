@@ -12,7 +12,7 @@ import { FinishDialog } from './FinishDialog';
 import { Figure } from './Figure';
 import { formatClock, TYPE_LABEL } from './format';
 import { APP_CONFIG } from '../config';
-import { navigate } from '../router';
+import { navigate, routeHref } from '../router';
 import { useAuth } from '../cloud/cloud';
 
 interface Props {
@@ -201,7 +201,7 @@ export function ExamScreen(props: Props) {
               </div>
               <div className="question__head-actions">
                 {isAdmin && (
-                  <a className="btn btn--ghost btn--sm" href={`#/edit/${encodeURIComponent(pkg.simulation.id)}/${position}`}><PenLine size={16} aria-hidden /> Редагувати</a>
+                  <a className="btn btn--ghost btn--sm" data-link href={routeHref({ name: 'edit', simulationId: pkg.simulation.id, position })}><PenLine size={16} aria-hidden /> Редагувати</a>
                 )}
                 <button type="button" className={`btn btn--flag btn--sm${flagged ? ' is-on' : ''}`} aria-pressed={flagged}
                   onClick={() => update((a) => toggleFlag(a, q.id))}>

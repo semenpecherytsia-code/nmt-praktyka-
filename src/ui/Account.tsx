@@ -1,5 +1,6 @@
 import { LogIn, LogOut, Shield } from 'lucide-react';
 import { cloudEnabled, signIn, signOut, useAuth } from '../cloud/cloud';
+import { routeHref } from '../router';
 
 /** Праворуч у шапці: вхід через Google, ім’я учня, посилання «Адмін» для адміністратора. */
 export function Account({ compact = false }: { compact?: boolean }) {
@@ -16,7 +17,7 @@ export function Account({ compact = false }: { compact?: boolean }) {
   }
   return (
     <div className="account">
-      {auth.isAdmin && <a className="btn btn--ghost btn--sm" href="#/admin"><Shield size={16} aria-hidden /> Адмін</a>}
+      {auth.isAdmin && <a className="btn btn--ghost btn--sm" data-link href={routeHref({ name: 'admin' })}><Shield size={16} aria-hidden /> Адмін</a>}
       {!compact && (
         <span className="account__user" title={auth.user.email}>
           {auth.user.avatar ? <img src={auth.user.avatar} alt="" className="account__avatar" referrerPolicy="no-referrer" /> : null}

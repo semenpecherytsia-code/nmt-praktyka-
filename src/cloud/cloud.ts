@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import type { Attempt } from '../engine/attempt';
 import type { AttemptRepo, KV } from '../engine/storage';
 import { CLOUD_CONFIG, cloudEnabled } from './config';
+import { setUrl } from '../router';
 
 export { cloudEnabled };
 
@@ -39,8 +40,7 @@ function restoreAfterLogin(): void {
   if (!url.searchParams.has('code') && !url.searchParams.has('error')) return;
   let back = '';
   try { back = sessionStorage.getItem(RETURN_KEY) ?? ''; sessionStorage.removeItem(RETURN_KEY); } catch { /* немає sessionStorage */ }
-  window.history.replaceState(null, '', url.pathname + (back || url.hash));
-  window.dispatchEvent(new HashChangeEvent('hashchange'));
+  setUrl(back || url.pathname + url.hash, true);
 }
 
 let state: AuthState = { ready: !supabase, user: null, isAdmin: false };
@@ -76,10 +76,10 @@ export function useAuth(): AuthState {
 
 export async function signIn(): Promise<void> {
   if (!supabase) return;
-  try { sessionStorage.setItem(RETURN_KEY, window.location.hash); } catch { /* немає sessionStorage */ }
+  try { sessionStorage.setItem(RETURN_KEY, window.location.pathname + window.location.hash); } catch { /* немає sessionStorage */ }
   await supabase.auth.signInWithOAuth({
     provider: 'google',
-    options: { redirectTo: window.location.origin + window.location.pathname, queryParams: { prompt: 'select_account' } },
+    options: { redirectTo: window.location.origin + import.meta.env.BASE_URL, queryParams: { prompt: 'select_account' } },
   });
 }
 
