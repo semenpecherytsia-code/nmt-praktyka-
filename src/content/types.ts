@@ -44,7 +44,17 @@ interface QuestionBase {
   maxPoints: number;
   textExplanation?: RichText | null;
   explanationVideoId?: string | null;
+  /** Відеопояснення з Bunny Stream (додає адміністратор на сайті). Має перевагу над картою відео. */
+  video?: QuestionVideo | null;
 }
+
+export interface BunnyVideo { provider: 'bunny'; libraryId: string; videoId: string }
+/** Відеофайл, завантажений на сайт (https-адреса MP4). */
+export interface FileVideo { provider: 'file'; src: string; mimeType?: string }
+export type QuestionVideo = BunnyVideo | FileVideo;
+
+/** Адреса вбудованого плеєра Bunny Stream. */
+export const bunnyEmbedUrl = (v: BunnyVideo) => `https://iframe.mediadelivery.net/embed/${v.libraryId}/${v.videoId}`;
 
 export interface SingleChoiceQuestion extends QuestionBase {
   type: 'single_choice';

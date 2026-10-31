@@ -33,8 +33,8 @@ grant execute on function public.is_admin() to anon;
 
 -- Кошик для файлів: читати може кожен (рисунки бачать учні), завантажувати й видаляти — лише адміністратор.
 insert into storage.buckets (id, name, public, file_size_limit)
-values ('content', 'content', true, 20971520)
-on conflict (id) do update set public = true, file_size_limit = 20971520;
+values ('content', 'content', true, 52428800)
+on conflict (id) do update set public = true, file_size_limit = 52428800;
 
 drop policy if exists "content files: admin insert" on storage.objects;
 create policy "content files: admin insert" on storage.objects

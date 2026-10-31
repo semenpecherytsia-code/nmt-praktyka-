@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Check, X, Minus, CircleSlash, RotateCcw, Home, ListOrdered, Clock, Target, Percent } from 'lucide-react';
-import type { ContentPackage, Question, VideoMap, VideoMedia } from '../content/types';
+import { bunnyEmbedUrl, type ContentPackage, type Question, type VideoMap, type VideoMedia } from '../content/types';
 import { type Attempt, orderedQuestions, timeSpentMs } from '../engine/attempt';
 import type { QuestionResult, QuestionStatus } from '../engine/scoring';
 import { displayNumber } from '../engine/numeric';
@@ -50,6 +50,10 @@ export function ReviewScreen({ attempt, pkg, baseDir, videoMap, onRetry, onHome,
         const x = media.get(b.explanationVideoId);
         if (x) m.set(b.questionId, x);
       }
+    }
+    for (const q of pkg.questions) {
+      if (q.video?.provider === 'bunny') m.set(q.id, { id: `bunny-${q.video.videoId}`, kind: 'embed', publicUrl: bunnyEmbedUrl(q.video), readiness: 'ready' });
+      else if (q.video?.provider === 'file') m.set(q.id, { id: `file-${q.id}`, kind: 'video', publicUrl: q.video.src, mimeType: q.video.mimeType, readiness: 'ready' });
     }
     return m;
   }, [videoMap, pkg]);

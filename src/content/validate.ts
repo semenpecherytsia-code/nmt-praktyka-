@@ -126,6 +126,16 @@ function validateQuestion(c: Collector, q: any, opts: ValidateOptions) {
   }
   if (q.textExplanation !== undefined && q.textExplanation !== null) checkRich(c, rec, 'textExplanation', q.textExplanation);
   if (q.explanationVideoId !== undefined && q.explanationVideoId !== null) checkId(c, rec, 'explanationVideoId', q.explanationVideoId);
+  if (q.video !== undefined && q.video !== null) {
+    const v = q.video;
+    if (isObj(v) && v.provider === 'file') {
+      if (typeof v.src !== 'string' || !/^https:\/\//i.test(v.src) || checkContentUrl(v.src)) c.error(rec, 'video.src', 'потрібна https-адреса відеофайлу');
+    } else if (!isObj(v) || v.provider !== 'bunny') c.error(rec, 'video', 'підтримуються відео Bunny або завантажений файл');
+    else {
+      if (typeof v.libraryId !== 'string' || !/^\d{1,12}$/.test(v.libraryId)) c.error(rec, 'video.libraryId', 'Library ID — це число з бібліотеки Bunny');
+      if (typeof v.videoId !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v.videoId)) c.error(rec, 'video.videoId', 'Video ID має вигляд xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx');
+    }
+  }
 
   const key = q.answerKey;
   if (!isObj(key)) return c.error(rec, 'answerKey', 'ключ відповіді відсутній');
