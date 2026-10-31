@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { APP_CONFIG } from './config';
-import { loadAll, type LoadedSet } from './content/load';
-import type { Catalog, ContentPackage } from './content/types';
+import { loadAll, type LoadedData, type LoadedSet } from './content/load';
+import type { ContentPackage } from './content/types';
 import { abandonAttempt, createAttempt, finishAttempt, isExpired, type Attempt } from './engine/attempt';
 import { AttemptRepo, browserKV, TabLease } from './engine/storage';
 import { navigate, routeHref, useRoute, type Route } from './router';
@@ -23,7 +23,7 @@ const repo = new AttemptRepo(kv);
 const tabId = (() => { try { return crypto.randomUUID(); } catch { return Math.random().toString(36).slice(2); } })();
 const lease = new TabLease(kv, tabId);
 
-interface Data { catalog: Catalog; sets: LoadedSet[] }
+type Data = LoadedData;
 
 function Top({ exam = false }: { exam?: boolean }) {
   return <div className={`topstrip${exam ? ' topstrip--exam' : ''}`}><Brand /><Account compact={exam} /></div>;
@@ -62,7 +62,7 @@ export function App() {
   const route = useRoute();
 
   useEffect(() => {
-    loadAll().then((d) => { finishExpired(d.sets); setData(d); }).catch((e) => setLoadError(String(e?.message ?? e)));
+    loadAll().then((d) => { finishExpired(d.all); setData(d); }).catch((e) => setLoadError(String(e?.message ?? e)));
   }, []);
 
   useEffect(() => { document.title = APP_CONFIG.appName; }, []);
@@ -71,9 +71,14 @@ export function App() {
   const auth = useAuth();
   useEffect(() => {
     if (!data || !auth.user) return;
-    const titleOf = (id: string) => data.sets.find((x) => x.entry.id === id)?.entry.title ?? null;
+    const titleOf = (id: string) => data.all.find((x) => x.entry.id === id)?.entry.title ?? null;
     void syncResults(repo, kv, titleOf);
   }, [data, auth.user?.id, route]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Чернетки й сховані симуляції база віддає лише адміністратору — після його входу перезавантажуємо.
+  useEffect(() => {
+    if (auth.isAdmin) loadAll().then(setData).catch(() => {});
+  }, [auth.isAdmin]);
 
   if (loadError) return <Fatal text={`Не вдалося завантажити каталог наборів (${loadError}).`} />;
   if (!data) return <div className="app"><div className="topstrip"><Brand /></div><p className="loading" role="status">Завантаження…</p></div>;
@@ -92,12 +97,12 @@ function Fatal({ text }: { text: string }) {
 }
 
 function Routed({ data, route, reload }: { data: Data; route: Route; reload: () => Promise<void> }) {
-  if (route.name === 'home') return <Home data={data} simulationId={route.simulationId} />;
+  if (route.name === 'home') return data.sets.length ? <Home data={data} simulationId={route.simulationId} /> : <Fatal text="Поки немає доступних симуляцій." />;
   if (route.name === 'edit') return (
-    <div className="app"><Top /><EditScreen sets={data.sets} simulationId={route.simulationId} position={route.position} reload={reload} /></div>
+    <div className="app"><Top /><EditScreen sets={data.all} edits={data.edits} catalog={data.catalog} simulationId={route.simulationId} position={route.position} reload={reload} /></div>
   );
   if (route.name === 'admin') return (
-    <div className="app"><Top /><AdminScreen titleOf={(id) => data.sets.find((x) => x.entry.id === id)?.entry.title ?? null} /></div>
+    <div className="app"><Top /><AdminScreen titleOf={(id) => data.all.find((x) => x.entry.id === id)?.entry.title ?? null} /></div>
   );
   return <AttemptView key={route.attemptId} data={data} route={route} />;
 }
@@ -113,7 +118,7 @@ function Home({ data, simulationId }: { data: Data; simulationId?: string }) {
   // Поки є незавершена спроба, головна завжди показує саме її симуляцію.
   const running = repo.list().find((a) => a.status === 'active' && !isExpired(a, Date.now()) && data.sets.some((s) => s.entry.id === a.simulationId && s.pkg));
   const requested = running?.simulationId ?? simulationId ?? prefs.selectedSimulationId ?? data.catalog.defaultSimulationId;
-  const set = data.sets.find((s) => s.entry.id === requested) ?? data.sets.find((s) => s.entry.id === data.catalog.defaultSimulationId)!;
+  const set = data.sets.find((s) => s.entry.id === requested) ?? data.sets.find((s) => s.entry.id === data.catalog.defaultSimulationId) ?? data.sets[0];
   const [overlay, send] = useOverlay('prepare');
   const [now, setNow] = useState(Date.now());
   const [, force] = useState(0);
@@ -127,7 +132,7 @@ function Home({ data, simulationId }: { data: Data; simulationId?: string }) {
   const simId = set.entry.id;
   const active = set.pkg ? repo.activeFor(simId) : null;
   const activeValid = active && !isExpired(active, now) ? active : null;
-  if (active && !activeValid) finishExpired(data.sets);
+  if (active && !activeValid) finishExpired(data.all);
   const finished = repo.finishedFor(simId);
   const available = data.sets.filter((s) => s.status === 'available');
   const demoId = data.catalog.demoSimulationId && available.some((s) => s.entry.id === data.catalog.demoSimulationId) ? data.catalog.demoSimulationId : null;
@@ -168,7 +173,7 @@ function Home({ data, simulationId }: { data: Data; simulationId?: string }) {
     const cur = repo.activeFor(simId);
     if (!cur) return;
     if (lease.state(cur.id) === 'other') { alert('Цю спробу відкрито в іншій вкладці. Завершіть її там.'); return; }
-    const pkg = contentFor(cur, data.sets);
+    const pkg = contentFor(cur, data.all);
     if (!pkg) return;
     repo.save(finishAttempt(cur, pkg, { now: Date.now(), reason: 'manual', applyDrafts: true }));
     navigate({ name: 'review', attemptId: cur.id });
@@ -194,9 +199,9 @@ function Home({ data, simulationId }: { data: Data; simulationId?: string }) {
 
 function AttemptView({ data, route }: { data: Data; route: Extract<Route, { name: 'attempt' | 'review' }> }) {
   const stored = useMemo(() => repo.get(route.attemptId), [route.attemptId]);
-  const pkg = useMemo(() => (stored ? contentFor(stored, data.sets) : null), [stored, data.sets]);
+  const pkg = useMemo(() => (stored ? contentFor(stored, data.all) : null), [stored, data.all]);
   const { attempt, update, finish, leaseState, takeOver, conflict, dismissConflict } = useAttempt(repo, lease, route.attemptId, pkg);
-  const set = data.sets.find((s) => s.entry.id === attempt?.simulationId);
+  const set = data.all.find((s) => s.entry.id === attempt?.simulationId);
   const { screen, redirect } = resolveScreen(route, attempt);
   const [overlay, send] = useOverlay(screen === 'review' ? 'review' : 'active');
   const auth = useAuth();
