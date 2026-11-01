@@ -661,3 +661,40 @@ label.btn { cursor: pointer; }
 .edit-savebar__text { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 0; }
 .edit-savebar__num { min-width: 32px; height: 32px; border-radius: 8px; border: 2px dashed #D97706; background: #FFF7E6; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; color: var(--text); }
 .edit-savebar .edit-status { margin: 0; flex-basis: 100%; }
+
+/* ---------- Статистика (адміністратор) ---------- */
+.admin-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); }
+.admin-tab { font: inherit; font-size: 16px; font-weight: 650; padding: 10px 16px; min-height: 44px; border: 0; background: none; color: var(--text-2); cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -1px; }
+.admin-tab.is-on { color: var(--text); border-bottom-color: var(--accent); }
+.stats-highlights { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; }
+@media (max-width: 760px) { .stats-highlights { grid-template-columns: minmax(0, 1fr); } }
+.stats-hl h2 { display: flex; align-items: center; gap: 8px; }
+.stats-hl--bad h2 { color: var(--bad); }
+.stats-hl--good h2 { color: var(--ok); }
+.stats-hl ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.stats-hl li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center; font-size: 14px; }
+.stats-hl li small { display: block; color: var(--text-2); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.stats-tasks__num { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 10px; background: var(--accent-soft); color: var(--accent-text); font-weight: 750; text-decoration: none; flex: none; }
+.stats-rank { display: inline-flex; align-items: center; justify-content: center; min-width: 28px; height: 28px; border-radius: 999px; font-weight: 750; background: var(--bg, #f4f4f8); }
+.stats-rank--1 { background: #FDE68A; } .stats-rank--2 { background: #E5E7EB; } .stats-rank--3 { background: #F5D0A9; }
+.stats-weak { white-space: normal !important; }
+.stats-chip { display: inline-flex; align-items: center; justify-content: center; min-width: 28px; height: 28px; padding: 0 6px; margin: 0 4px 4px 0; border-radius: 8px; background: var(--bad-bg); border: 1px solid var(--bad-border); color: var(--bad); font-weight: 700; text-decoration: none; font-size: 13px; }
+.stats-hist { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.stats-hist li { display: grid; grid-template-columns: 76px minmax(0, 1fr) 84px; gap: 10px; align-items: center; font-size: 14px; }
+.stats-hist__bar { height: 22px; background: var(--bg, #f4f4f8); border-radius: 6px; overflow: hidden; }
+.stats-hist__bar > span { display: block; height: 100%; background: var(--accent); border-radius: 6px; min-width: 2px; }
+.stats-hist__n { color: var(--text-2); font-variant-numeric: tabular-nums; }
+.stats-toggle { display: flex; gap: 6px; flex-wrap: wrap; }
+.stats-legend { list-style: none; margin: 0; padding: 0; display: flex; gap: 6px 14px; flex-wrap: wrap; font-size: 13px; color: var(--text-2); }
+.stats-legend li { display: inline-flex; align-items: center; gap: 6px; }
+.sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; }
+.sw--correct { background: #22A35A; } .sw--partial { background: #F2B13C; } .sw--wrong { background: #E5484D; } .sw--skipped { background: #C7C9D3; }
+.stats-tasks { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.stats-tasks > li { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: start; }
+.stats-tasks__body { display: grid; gap: 6px; min-width: 0; }
+.stats-tasks__top { display: flex; justify-content: space-between; gap: 8px; font-size: 14px; }
+.stats-tasks__type { color: var(--text-2); }
+.stats-bar { display: flex; height: 22px; border-radius: 6px; overflow: hidden; background: var(--bg, #f4f4f8); }
+.stats-bar > span { display: flex; align-items: center; justify-content: center; color: #fff; font-size: 11px; font-weight: 700; min-width: 0; overflow: hidden; }
+.stats-bar > .sw--skipped { color: #3b3d4a; }
+.stats-tasks__text { font-size: 13px; color: var(--text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

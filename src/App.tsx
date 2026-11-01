@@ -102,7 +102,7 @@ function Routed({ data, route, reload }: { data: Data; route: Route; reload: () 
     <div className="app"><Top /><EditScreen sets={data.all} edits={data.edits} catalog={data.catalog} simulationId={route.simulationId} position={route.position} reload={reload} /></div>
   );
   if (route.name === 'admin') return (
-    <div className="app"><Top /><AdminScreen titleOf={(id) => data.all.find((x) => x.entry.id === id)?.entry.title ?? null} /></div>
+    <div className="app"><Top /><AdminScreen titleOf={(id) => data.all.find((x) => x.entry.id === id)?.entry.title ?? null} pkgOf={(id) => data.all.find((x) => x.entry.id === id)?.pkg ?? null} /></div>
   );
   return <AttemptView key={route.attemptId} data={data} route={route} />;
 }

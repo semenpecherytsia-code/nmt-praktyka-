@@ -17,6 +17,7 @@ export const supabase: SupabaseClient | null = cloudEnabled
 const RETURN_KEY = 'nmt.v1.authReturn';
 const UPLOADED_KEY = 'nmt.v1.uploaded';
 const OWNER_KEY = 'nmt.v1.owners';
+const DETAILED_KEY = 'nmt.v1.detailed';
 
 export interface CloudUser { id: string; email: string; name: string; avatar: string | null }
 
@@ -93,6 +94,13 @@ function uploadedIds(kv: KV): Set<string> {
   try { return new Set(JSON.parse(kv.get(UPLOADED_KEY) ?? '[]') as string[]); } catch { return new Set(); }
 }
 
+/** Результат одного завдання в базі (коротко, щоб рядок був невеликим): номер, статус, бали, максимум. */
+export interface QuestionDetail { p: number; s: 'correct' | 'partial' | 'wrong' | 'skipped'; e: number; m: number }
+
+export function questionDetails(a: Attempt): QuestionDetail[] {
+  return a.result!.questions.map((q) => ({ p: q.position, s: q.status, e: q.earned, m: q.max }));
+}
+
 export function resultRow(a: Attempt, user: CloudUser, title: string | null) {
   const r = a.result!;
   return {
@@ -115,8 +123,19 @@ export function resultRow(a: Attempt, user: CloudUser, title: string | null) {
     finished_at: new Date(a.finishedAt ?? a.startedAt).toISOString(),
     duration_seconds: Math.round(((a.finishedAt ?? a.startedAt) - a.startedAt) / 1000),
     finish_reason: a.finishReason,
+    questions: questionDetails(a) as QuestionDetail[] | null,
   };
 }
+
+function idSet(kv: KV, key: string): Set<string> {
+  try { return new Set(JSON.parse(kv.get(key) ?? '[]') as string[]); } catch { return new Set(); }
+}
+
+/** Колонку questions додає окремий SQL; поки її немає, результати надсилаються без розбивки по завданнях. */
+let detailsColumn = true;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const withoutDetails = ({ questions, ...rest }: ReturnType<typeof resultRow>) => rest;
+const missingColumn = (e: { code?: string; message?: string } | null) => !!e && (e.code === 'PGRST204' || /questions/.test(e.message ?? ''));
 
 function owners(kv: KV): Record<string, string> {
   try { return JSON.parse(kv.get(OWNER_KEY) ?? '{}') as Record<string, string>; } catch { return {}; }
@@ -137,13 +156,29 @@ export async function syncResults(repo: AttemptRepo, kv: KV, titleOf: (simId: st
   try {
     const done = uploadedIds(kv);
     const own = owners(kv);
+    const detailed = idSet(kv, DETAILED_KEY);
+    const markDetailed = (id: string) => { detailed.add(id); kv.set(DETAILED_KEY, JSON.stringify([...detailed])); };
     for (const a of repo.list()) {
-      if (a.status !== 'finished' || !a.result || done.has(a.id) || own[a.id] !== user.id) continue;
-      const { error } = await supabase.from('results').insert(resultRow(a, user, titleOf(a.simulationId)));
+      if (a.status !== 'finished' || !a.result || own[a.id] !== user.id) continue;
+      if (done.has(a.id)) {
+        // Спроби, надіслані до появи статистики по завданнях: один раз доповнюємо розбивкою.
+        if (!detailsColumn || detailed.has(a.id)) continue;
+        const { error } = await supabase.from('results').update({ questions: questionDetails(a) }).eq('id', a.id);
+        if (missingColumn(error)) detailsColumn = false;
+        else if (!error) markDetailed(a.id);
+        continue;
+      }
+      const row = resultRow(a, user, titleOf(a.simulationId));
+      let { error } = await supabase.from('results').insert(detailsColumn ? row : withoutDetails(row));
+      if (missingColumn(error)) {
+        detailsColumn = false;
+        ({ error } = await supabase.from('results').insert(withoutDetails(row)));
+      }
       // 23505 — такий запис уже є (наприклад, надіслано з іншої вкладки).
       if (error && error.code !== '23505') break;
       done.add(a.id);
       kv.set(UPLOADED_KEY, JSON.stringify([...done]));
+      if (detailsColumn && !error) markDetailed(a.id);
     }
   } finally {
     syncing = false;
