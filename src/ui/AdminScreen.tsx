@@ -3,8 +3,10 @@ import { ChevronDown, ChevronRight, PenLine, RefreshCw, Search, ShieldAlert } fr
 import { fetchAllResults, signIn, useAuth, type ResultRow } from '../cloud/cloud';
 import { routeHref } from '../router';
 import { formatDateTime, formatDuration, plural } from './format';
+import { StatsPanel } from './StatsPanel';
+import type { ContentPackage } from '../content/types';
 
-interface Props { titleOf: (simId: string) => string | null }
+interface Props { titleOf: (simId: string) => string | null; pkgOf: (simId: string) => ContentPackage | null }
 
 interface Student { userId: string; name: string; email: string; rows: ResultRow[] }
 
@@ -15,7 +17,8 @@ const nmtText = (r: ResultRow) => (r.nmt_score === null ? 'не склав' : St
 const ts = (iso: string) => new Date(iso).getTime();
 
 /** Сторінка адміністратора: усі результати учнів із бази. Дані видно лише пошті зі списку admins (перевіряє сама база). */
-export function AdminScreen({ titleOf }: Props) {
+export function AdminScreen({ titleOf, pkgOf }: Props) {
+  const [tab, setTab] = useState<'results' | 'stats'>('results');
   const auth = useAuth();
   const [rows, setRows] = useState<ResultRow[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -72,6 +75,8 @@ export function AdminScreen({ titleOf }: Props) {
   }
 
   const nmts = filtered.map(nmtOf).filter((x): x is number => x !== null);
+  // Статистика по завданнях має сенс для одного тесту: якщо обрано «Усі тести», беремо той, де найбільше спроб.
+  const statsSim = sim !== 'all' ? sim : [...tests].sort((a, b) => b.attempts - a.attempts)[0]?.id ?? null;
 
   return (
     <main className="admin" id="main">
@@ -102,6 +107,19 @@ export function AdminScreen({ titleOf }: Props) {
             </label>
           </div>
 
+          <div className="admin-tabs" role="tablist" aria-label="Розділи">
+            <button type="button" role="tab" aria-selected={tab === 'results'} className={`admin-tab${tab === 'results' ? ' is-on' : ''}`} onClick={() => setTab('results')}>Результати</button>
+            <button type="button" role="tab" aria-selected={tab === 'stats'} className={`admin-tab${tab === 'stats' ? ' is-on' : ''}`} onClick={() => setTab('stats')}>Статистика</button>
+          </div>
+
+          {tab === 'stats' && (statsSim ? (
+            <>
+              {sim === 'all' && <p className="hint">Показано тест «{tests.find((t) => t.id === statsSim)?.title}». Інший тест можна обрати у фільтрі вище.</p>}
+              <StatsPanel rows={filtered.filter((r) => r.simulation_id === statsSim)} simulationId={statsSim} pkg={pkgOf(statsSim)} />
+            </>
+          ) : <p className="hint">Ще ніхто не пройшов тест.</p>)}
+
+          {tab === 'results' && <>
           <dl className="admin__stats">
             <div><dt>Учнів</dt><dd>{students.length}</dd></div>
             <div><dt>Спроб</dt><dd>{filtered.length}</dd></div>
@@ -166,6 +184,7 @@ export function AdminScreen({ titleOf }: Props) {
             <h2 className="admin__h2">Усі спроби <span className="hint">({filtered.length} {plural(filtered.length, ['спроба', 'спроби', 'спроб'])})</span></h2>
             <AttemptsTable rows={filtered} title={title} showStudent />
           </section>
+          </>}
         </>
       )}
     </main>
