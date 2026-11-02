@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { Info, PenLine, ThumbsUp, TriangleAlert } from 'lucide-react';
+import { useMemo, useRef, useState } from 'react';
+import { ChevronDown, ChevronUp, Info, ListOrdered, PenLine, ThumbsUp, TriangleAlert } from 'lucide-react';
 import type { QuestionDetail, ResultRow } from '../cloud/cloud';
 import type { ContentPackage } from '../content/types';
 import { orderedQuestions } from '../engine/attempt';
@@ -37,6 +37,12 @@ const BUCKETS: { label: string; test: (n: number | null) => boolean }[] = [
 /** Статистика симуляції: рейтинг учнів, розподіл балів і які завдання найважчі. */
 export function StatsPanel({ rows, simulationId, pkg }: Props) {
   const [order, setOrder] = useState<'hard' | 'num'>('hard');
+  const [showAll, setShowAll] = useState(false);
+  const allRef = useRef<HTMLElement>(null);
+  const openAll = () => {
+    setShowAll(true);
+    window.setTimeout(() => allRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 0);
+  };
   const ordered = useMemo(() => (pkg ? orderedQuestions(pkg) : []), [pkg]);
 
   const detailed = rows.filter((r) => Array.isArray(r.questions) && r.questions.length > 0);
@@ -77,8 +83,8 @@ export function StatsPanel({ rows, simulationId, pkg }: Props) {
   const maxBucket = Math.max(1, ...BUCKETS.map((b) => nmtAll.filter(b.test).length));
   const passed = nmtAll.filter((x) => x !== null).length;
 
-  const hardest = [...tasks].sort((a, b) => a.ok - b.ok).slice(0, 3);
-  const easiest = [...tasks].sort((a, b) => b.ok - a.ok).slice(0, 3);
+  const hardest = [...tasks].sort((a, b) => a.ok - b.ok).slice(0, 5);
+  const easiest = [...tasks].sort((a, b) => b.ok - a.ok).slice(0, 5);
   const shown = order === 'hard' ? [...tasks].sort((a, b) => a.ok - b.ok || a.p - b.p) : tasks;
   const qAt = (p: number) => ordered[p - 1];
   const editHref = (p: number) => routeHref({ name: 'edit', simulationId, position: p });
@@ -104,50 +110,16 @@ export function StatsPanel({ rows, simulationId, pkg }: Props) {
             <h2 className="admin__h2"><ThumbsUp size={18} aria-hidden /> Найлегші</h2>
             <ol>{easiest.map((t) => <TaskLine key={t.p} t={t} q={qAt(t.p)} href={editHref(t.p)} />)}</ol>
           </section>
+          <button type="button" className="btn btn--outline btn--block stats-allbtn" aria-expanded={showAll} onClick={() => (showAll ? setShowAll(false) : openAll())}>
+            <ListOrdered size={18} aria-hidden /> {showAll ? 'Сховати статистику всіх завдань' : `Відкрити всі завдання (${tasks.length})`}
+            {showAll ? <ChevronUp size={18} aria-hidden /> : <ChevronDown size={18} aria-hidden />}
+          </button>
         </div>
       )}
 
-      <section className="card admin-card">
-        <h2 className="admin__h2">Рейтинг учнів</h2>
-        <div className="admin__table-wrap">
-          <table className="admin__table">
-            <thead><tr><th>#</th><th>Учень</th><th>Найкращий НМТ</th><th>Середній НМТ</th><th>Найкращий первинний</th><th>Спроб</th><th>Найчастіше помиляється</th></tr></thead>
-            <tbody>
-              {students.map((s, i) => (
-                <tr key={s.id}>
-                  <td><span className={`stats-rank${i < 3 ? ` stats-rank--${i + 1}` : ''}`}>{i + 1}</span></td>
-                  <td><strong>{s.name}</strong><small>{s.email}</small></td>
-                  <td><strong>{s.best ?? 'не склав'}</strong></td>
-                  <td>{fmt1(s.avgNmt)}</td>
-                  <td>{s.bestPrimary}{pkg ? <small>з {rows[0].max_score}</small> : null}</td>
-                  <td>{s.attempts}</td>
-                  <td className="stats-weak">{s.weak.length ? s.weak.map((p) => <a key={p} href={editHref(p)} data-link className="stats-chip">{p}</a>) : <span className="hint">{s.hasDetails ? 'немає' : '—'}</span>}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <section className="card admin-card">
-        <h2 className="admin__h2">Розподіл балів НМТ</h2>
-        <ul className="stats-hist">
-          {BUCKETS.map((b) => {
-            const n = nmtAll.filter(b.test).length;
-            return (
-              <li key={b.label}>
-                <span className="stats-hist__label">{b.label}</span>
-                <span className="stats-hist__bar"><span style={{ width: `${(n / maxBucket) * 100}%` }} /></span>
-                <span className="stats-hist__n">{n} {plural(n, ['спроба', 'спроби', 'спроб'])}</span>
-              </li>
-            );
-          })}
-        </ul>
-      </section>
-
-      <section className="card admin-card">
+      {(showAll || tasks.length === 0) && <section className="card admin-card stats-all" ref={allRef}>
         <div className="admin__head">
-          <h2 className="admin__h2">Завдання</h2>
+          <h2 className="admin__h2">Усі завдання</h2>
           <div className="stats-toggle" role="group" aria-label="Порядок завдань">
             <button type="button" className={`chip${order === 'hard' ? ' is-on' : ''}`} aria-pressed={order === 'hard'} onClick={() => setOrder('hard')}>Найважчі спочатку</button>
             <button type="button" className={`chip${order === 'num' ? ' is-on' : ''}`} aria-pressed={order === 'num'} onClick={() => setOrder('num')}>За номером</button>
@@ -187,7 +159,46 @@ export function StatsPanel({ rows, simulationId, pkg }: Props) {
             </ol>
           </>
         )}
+      </section>}
+
+      <section className="card admin-card">
+        <h2 className="admin__h2">Рейтинг учнів</h2>
+        <div className="admin__table-wrap">
+          <table className="admin__table">
+            <thead><tr><th>#</th><th>Учень</th><th>Найкращий НМТ</th><th>Середній НМТ</th><th>Найкращий первинний</th><th>Спроб</th><th>Найчастіше помиляється</th></tr></thead>
+            <tbody>
+              {students.map((s, i) => (
+                <tr key={s.id}>
+                  <td><span className={`stats-rank${i < 3 ? ` stats-rank--${i + 1}` : ''}`}>{i + 1}</span></td>
+                  <td><strong>{s.name}</strong><small>{s.email}</small></td>
+                  <td><strong>{s.best ?? 'не склав'}</strong></td>
+                  <td>{fmt1(s.avgNmt)}</td>
+                  <td>{s.bestPrimary}{pkg ? <small>з {rows[0].max_score}</small> : null}</td>
+                  <td>{s.attempts}</td>
+                  <td className="stats-weak">{s.weak.length ? s.weak.map((p) => <a key={p} href={editHref(p)} data-link className="stats-chip">{p}</a>) : <span className="hint">{s.hasDetails ? 'немає' : '—'}</span>}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </section>
+
+      <section className="card admin-card">
+        <h2 className="admin__h2">Розподіл балів НМТ</h2>
+        <ul className="stats-hist">
+          {BUCKETS.map((b) => {
+            const n = nmtAll.filter(b.test).length;
+            return (
+              <li key={b.label}>
+                <span className="stats-hist__label">{b.label}</span>
+                <span className="stats-hist__bar"><span style={{ width: `${(n / maxBucket) * 100}%` }} /></span>
+                <span className="stats-hist__n">{n} {plural(n, ['спроба', 'спроби', 'спроб'])}</span>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+
     </>
   );
 }
