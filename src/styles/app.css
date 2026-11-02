@@ -711,3 +711,5 @@ label.btn { cursor: pointer; }
 .stats-bar > span { display: flex; align-items: center; justify-content: center; color: var(--text); font-size: 11px; font-weight: 700; min-width: 0; overflow: hidden; }
 .stats-bar > .sw--skipped { color: var(--skip); }
 .stats-tasks__text { font-size: 13px; color: var(--text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.stats-allbtn { grid-column: 1 / -1; gap: 10px; }
+.stats-all { scroll-margin-top: 16px; }
